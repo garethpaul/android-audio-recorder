@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import java.io.IOException;
@@ -24,10 +25,10 @@ public class MainActivity extends Activity {
     private static final String LOG_TAG = "AudioRecordTest";
     private static String mFileName = null;
 
-    private Button mRecordButton = null;
+    private ImageButton mRecordButton = null;
     private MediaRecorder mRecorder = null;
 
-    private Button   mPlayButton = null;
+    private ImageButton mPlayButton = null;
     private MediaPlayer mPlayer = null;
 
 
@@ -90,8 +91,6 @@ public class MainActivity extends Activity {
         mRecorder = null;
     }
 
-
-
     public MainActivity() {
         mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
         mFileName += "/audiorecordtest.3gp";
@@ -100,20 +99,27 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+
+        getActionBar().setDisplayShowTitleEnabled(false);
+        getActionBar().setIcon(R.drawable.logo);
+
         setContentView(R.layout.activity_main);
 
         final boolean[] mStartRecording = {true};
-        mRecordButton = (Button) findViewById(R.id.record);
+        mRecordButton = (ImageButton) findViewById(R.id.record);
         mRecordButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Do something in response to button click
 
                 if (mStartRecording[0]) {
                     startRecording();
-                    mRecordButton.setText("Stop recording");
+                    mRecordButton.setVisibility(View.VISIBLE);
+                    mRecordButton.setImageResource(R.drawable.stop);
                 } else {
                     stopRecording();
-                    mRecordButton.setText("Start recording");
+                    mRecordButton.setVisibility(View.INVISIBLE);
+                    mPlayButton.setVisibility(View.VISIBLE);
+                    mPlayButton.setImageResource(R.drawable.play);
                 }
                 mStartRecording[0] = !mStartRecording[0];
             }
@@ -121,16 +127,19 @@ public class MainActivity extends Activity {
 
 
         final boolean[] mStartPlaying = {true};
-        mPlayButton = (Button) findViewById(R.id.play);
+        mPlayButton = (ImageButton) findViewById(R.id.play);
         mPlayButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 onPlay(mStartPlaying[0]);
                 if (mStartPlaying[0]) {
                     startPlaying();
-                    mPlayButton.setText("Stop playing");
+                    mPlayButton.setVisibility(View.VISIBLE);
+                    mPlayButton.setImageResource(R.drawable.stop);
                 } else {
                     stopPlaying();
-                    mPlayButton.setText("Start playing");
+                    mPlayButton.setVisibility(View.INVISIBLE);
+                    mRecordButton.setVisibility(View.VISIBLE);
+                    mRecordButton.setImageResource(R.drawable.record);
                 }
                 mStartPlaying[0] = !mStartPlaying[0];
             }
