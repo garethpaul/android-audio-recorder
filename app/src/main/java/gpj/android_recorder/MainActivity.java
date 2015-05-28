@@ -1,26 +1,17 @@
 package gpj.android_recorder;
 
 import android.app.Activity;
-import android.content.Context;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 
 import java.io.IOException;
 
-
 public class MainActivity extends Activity {
-
-
 
     private static final String LOG_TAG = "AudioRecordTest";
     private static String mFileName = null;
@@ -30,7 +21,6 @@ public class MainActivity extends Activity {
 
     private ImageButton mPlayButton = null;
     private MediaPlayer mPlayer = null;
-
 
     private void onRecord(boolean start) {
         if (start) {
