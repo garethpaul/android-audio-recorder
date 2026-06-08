@@ -1,5 +1,8 @@
 # Android Audio Recorder
 
+<!-- README-OVERVIEW-IMAGE -->
+![Project overview](docs/readme-overview.svg)
+
 Legacy Android sample that records audio to external storage and plays it back.
 
 ## Toolchain
