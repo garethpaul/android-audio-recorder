@@ -40,7 +40,6 @@ Canonical security policy and reporting:
 
 - [`SECURITY.md`](SECURITY.md)
 
-
 Recorded audio is sensitive. Changes must avoid logging recording contents,
 leaking file paths unnecessarily, or broadening storage access beyond what the
 sample requires.
