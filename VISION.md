@@ -42,7 +42,7 @@ sample requires.
 
 Do not commit local SDK paths, generated audio files, or device-specific data.
 
-## What We Will Not Merge For Now
+## What We Will Not Merge (For Now)
 
 - Broad rewrites that mix media behavior with build-system migration
 - Permission work that requests more access than the sample needs
