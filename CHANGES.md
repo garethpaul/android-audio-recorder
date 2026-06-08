@@ -9,3 +9,5 @@
   adding button accessibility labels.
 - Moved the recorder background color into the app theme to avoid root-layout
   overdraw.
+- Added recorder/player cleanup contracts so failed media prepare/start/stop
+  paths release resources predictably.

@@ -39,6 +39,7 @@ public class MainActivity extends Activity {
     }
 
     private void startPlaying() {
+        releasePlayer();
         mPlayer = new MediaPlayer();
         try {
             mPlayer.setDataSource(mFileName);
@@ -46,20 +47,34 @@ public class MainActivity extends Activity {
             mPlayer.start();
         } catch (IOException e) {
             Log.e(LOG_TAG, "prepare() failed");
+            releasePlayer();
+        } catch (RuntimeException e) {
+            Log.e(LOG_TAG, "startPlaying() failed");
+            releasePlayer();
         }
     }
 
     private void stopPlaying() {
-        if(mPlayer != null) {
-            mPlayer.stop();
-            mPlayer.reset();
-            mPlayer.release();
+        if (mPlayer != null) {
+            try {
+                mPlayer.stop();
+            } catch (RuntimeException e) {
+                Log.e(LOG_TAG, "stopPlaying() failed");
+            }
         }
 
+        releasePlayer();
+    }
+
+    private void releasePlayer() {
+        if (mPlayer != null) {
+            mPlayer.release();
+        }
         mPlayer = null;
     }
 
     private void startRecording() {
+        releaseRecorder();
         mRecorder = new MediaRecorder();
         mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
@@ -68,16 +83,32 @@ public class MainActivity extends Activity {
 
         try {
             mRecorder.prepare();
+            mRecorder.start();
         } catch (IOException e) {
             Log.e(LOG_TAG, "prepare() failed");
+            releaseRecorder();
+        } catch (RuntimeException e) {
+            Log.e(LOG_TAG, "startRecording() failed");
+            releaseRecorder();
         }
-
-        mRecorder.start();
     }
 
     private void stopRecording() {
-        mRecorder.stop();
-        mRecorder.release();
+        if (mRecorder != null) {
+            try {
+                mRecorder.stop();
+            } catch (RuntimeException e) {
+                Log.e(LOG_TAG, "stopRecording() failed");
+            }
+        }
+
+        releaseRecorder();
+    }
+
+    private void releaseRecorder() {
+        if (mRecorder != null) {
+            mRecorder.release();
+        }
         mRecorder = null;
     }
 
@@ -143,13 +174,11 @@ public class MainActivity extends Activity {
     public void onPause() {
         super.onPause();
         if (mRecorder != null) {
-            mRecorder.release();
-            mRecorder = null;
+            releaseRecorder();
         }
 
         if (mPlayer != null) {
-            mPlayer.release();
-            mPlayer = null;
+            releasePlayer();
         }
     }
 }

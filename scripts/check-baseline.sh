@@ -22,6 +22,21 @@ if ! grep -Fq "onPlay(false);" "$MAIN_ACTIVITY"; then
   exit 1
 fi
 
+if ! grep -Fq "private void releaseRecorder()" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Recorder cleanup must be centralized in releaseRecorder()." >&2
+  exit 1
+fi
+
+if ! grep -Fq "private void releasePlayer()" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Player cleanup must be centralized in releasePlayer()." >&2
+  exit 1
+fi
+
+if ! grep -Fq "catch (RuntimeException e)" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Recorder/player stop and start failures must be guarded." >&2
+  exit 1
+fi
+
 if [ ! -f "$ROOT_DIR/CHANGES.md" ]; then
   printf '%s\n' "CHANGES.md is missing." >&2
   exit 1
