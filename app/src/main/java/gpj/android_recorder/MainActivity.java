@@ -120,13 +120,12 @@ public class MainActivity extends Activity {
         mPlayButton = (ImageButton) findViewById(R.id.play);
         mPlayButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                onPlay(mStartPlaying[0]);
                 if (mStartPlaying[0]) {
-                    startPlaying();
+                    onPlay(true);
                     mPlayButton.setVisibility(View.VISIBLE);
                     mPlayButton.setImageResource(R.drawable.stop);
                 } else {
-                    stopPlaying();
+                    onPlay(false);
                     mPlayButton.setVisibility(View.INVISIBLE);
                     mRecordButton.setVisibility(View.VISIBLE);
                     mRecordButton.setImageResource(R.drawable.record);
