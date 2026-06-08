@@ -1,5 +1,8 @@
 # android-audio-recorder
 
+<!-- README-OVERVIEW-IMAGE -->
+![Project overview](docs/readme-overview.svg)
+
 ## Overview
 
 `garethpaul/android-audio-recorder` is an Android application or sample. A simple audio recorder for Android.
@@ -78,4 +81,3 @@ Keep changes small and tied to the project that is already present in this repos
 Prior README summary:
 
 > Android Audio Recorder <!-- README-OVERVIEW-IMAGE --> Legacy Android sample that records audio to external storage and plays it back. Toolchain This project currently uses the original Android build stack: - Gradle wrapper 2.2.1 - Android Gradle Plugin 1.2.3 - compile SDK 22 / target SDK 22 - Android build-tools 24.0.3 Configure an Android SDK path before running Gradle: ```sh export ANDROID_HOME=/path/to/android-sdk ```
-
