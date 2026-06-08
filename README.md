@@ -1,61 +1,81 @@
-# Android Audio Recorder
+# android-audio-recorder
 
-<!-- README-OVERVIEW-IMAGE -->
-![Project overview](docs/readme-overview.svg)
+## Overview
 
-Legacy Android sample that records audio to external storage and plays it back.
+`garethpaul/android-audio-recorder` is an Android application or sample. A simple audio recorder for Android.
 
-## Toolchain
+This README is based on the checked-in source, manifests, scripts, and repository metadata on the `master` branch. The project language mix found during review was: Java (2), shell (1).
 
-This project currently uses the original Android build stack:
+## Repository Contents
 
-- Gradle wrapper 2.2.1
-- Android Gradle Plugin 1.2.3
-- compile SDK 22 / target SDK 22
-- Android build-tools 24.0.3
+- `README.md` - project overview and local usage notes
+- `build.gradle` - Android or Gradle build configuration
+- `app` - source or example code
+- `docs` - source or example code
+- `gradle` - source or example code
+- `gradlew` - Android or Gradle build configuration
+- `scripts` - source or example code
+- `SECURITY.md` - security reporting and disclosure guidance
+- `VISION.md` - project direction and maintenance guardrails
 
-Configure an Android SDK path before running Gradle:
+Additional scan context:
 
-```sh
-export ANDROID_HOME=/path/to/android-sdk
+- Source directories: app, docs, gradle, scripts
+- Dependency and build manifests: build.gradle, gradlew
+- Entry points or build surfaces: Gradle build files
+- Test-looking files: app/src/androidTest/java/gpj/android_recorder/ApplicationTest.java
+
+## Getting Started
+
+### Prerequisites
+
+- Git
+- Android Studio or a compatible Android SDK
+- Gradle or the checked-in Gradle wrapper when present
+
+### Setup
+
+```bash
+git clone https://github.com/garethpaul/android-audio-recorder.git
+cd android-audio-recorder
 ```
 
-or create an untracked `local.properties` file:
+The setup commands above are derived from repository files. Legacy mobile, Python, or JavaScript samples may require older SDKs or package versions than a modern workstation uses by default.
 
-```properties
-sdk.dir=/path/to/android-sdk
-```
+## Running or Using the Project
 
-## Verify
+- Use Android Studio to open the project or run `./gradlew assembleDebug` when the Android SDK is configured.
 
-Run the SDK-free source baseline check first:
+## Testing and Verification
 
-```sh
-scripts/check-baseline.sh
-```
+- `./gradlew test` or Android Studio's test runner when the SDK is configured
 
-Then run Gradle after Android SDK configuration is available:
+When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 
-```sh
-./gradlew lint --no-daemon
-./gradlew test --no-daemon
-./gradlew assembleDebug --no-daemon
-```
+## Configuration and Secrets
 
-If Gradle reports `SDK location not found`, configure `ANDROID_HOME` or
-`local.properties` and rerun the command.
+- No required secret or credential file was identified in the repository scan. If you add integrations later, keep secrets out of git.
 
-The original build-tools 22.0.1 package uses an obsolete `aapt` binary that can
-fail to load on current Linux hosts, so this baseline pins build-tools 24.0.3
-while leaving the rest of the legacy Android stack unchanged.
+## Security and Privacy Notes
 
-## Modernization Notes
+- Review changes touching network requests, sockets, or service endpoints; examples from the scan include app/src/androidTest/java/gpj/android_recorder/ApplicationTest.java, app/src/main/AndroidManifest.xml, app/src/main/res/layout/activity_main.xml, gradle.properties.
+- Review changes touching mobile permissions or privacy-sensitive device data; examples from the scan include app/src/main/AndroidManifest.xml, docs/plans/2026-06-08-recorder-build-tools-baseline.md, docs/plans/2026-06-08-recorder-lint-resource-baseline.md, docs/plans/2026-06-08-recorder-playback-baseline.md, and 1 more.
+- Review changes touching file, media, JSON, XML, CSV, OCR, or data parsing; examples from the scan include app/lint.xml, app/src/main/AndroidManifest.xml, app/src/main/res/values-w820dp/dimens.xml, docs/plans/2026-06-08-recorder-lint-resource-baseline.md, and 1 more.
+- Review changes touching database, model, or persistence code; examples from the scan include docs/plans/2026-06-08-recorder-build-tools-baseline.md.
 
-The current baseline fixes duplicate playback dispatch from the play button and
-keeps Android lint clean for the legacy UI resources. `app/lint.xml` suppresses
-only the obsolete lint API database error from this old toolchain and the
-missing-density-folder warning for bitmap assets intentionally kept in
-`drawable-nodpi`. A future pass should modernize Gradle, SDK levels, runtime
-permission handling,
-external-storage behavior, and add Android test coverage in an SDK-capable
-environment.
+## Maintenance Notes
+
+- This looks like a legacy Android project or sample. Expect Android SDK, Gradle, and support-library versions to matter.
+- See `SECURITY.md` for vulnerability reporting and safe research guidance.
+- See `VISION.md` for project direction and contribution guardrails.
+
+## Contributing
+
+Keep changes small and tied to the project that is already present in this repository. For code changes, document the toolchain used, avoid committing generated dependency directories or local configuration, and update this README when setup or verification steps change.
+
+## Existing Project Notes
+
+Prior README summary:
+
+> Android Audio Recorder <!-- README-OVERVIEW-IMAGE --> Legacy Android sample that records audio to external storage and plays it back. Toolchain This project currently uses the original Android build stack: - Gradle wrapper 2.2.1 - Android Gradle Plugin 1.2.3 - compile SDK 22 / target SDK 22 - Android build-tools 24.0.3 Configure an Android SDK path before running Gradle: ```sh export ANDROID_HOME=/path/to/android-sdk ```
+
