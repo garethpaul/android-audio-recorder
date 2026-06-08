@@ -1,5 +1,8 @@
 ## Android Audio Recorder Vision
 
+This document explains the current state and direction of the project.
+Project overview and developer docs: [`README.md`](README.md)
+
 Android Audio Recorder is a legacy Android sample that records audio to
 external storage and plays it back.
 
