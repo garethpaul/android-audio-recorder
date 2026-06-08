@@ -48,3 +48,6 @@ Do not commit local SDK paths, generated audio files, or device-specific data.
 - Permission work that requests more access than the sample needs
 - Storage changes without notes about Android version behavior
 - Test or verification removals without a replacement gate
+
+This list is a roadmap guardrail, not a permanent rule.
+Strong user demand and strong technical rationale can change it.
