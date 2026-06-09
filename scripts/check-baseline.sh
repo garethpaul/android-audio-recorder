@@ -40,6 +40,16 @@ if grep -Fq "onPlay(mStartPlaying[0]);" "$MAIN_ACTIVITY"; then
   exit 1
 fi
 
+if ! grep -Fq 'android:allowBackup="false"' "$ROOT_DIR/app/src/main/AndroidManifest.xml"; then
+  printf '%s\n' "Recorder must disable Android backups for local audio state." >&2
+  exit 1
+fi
+
+if grep -Fq 'android:allowBackup="true"' "$ROOT_DIR/app/src/main/AndroidManifest.xml"; then
+  printf '%s\n' "Recorder must not allow Android backups." >&2
+  exit 1
+fi
+
 if ! grep -Fq "onPlay(true);" "$MAIN_ACTIVITY"; then
   printf '%s\n' "Play-start branch must call onPlay(true)." >&2
   exit 1

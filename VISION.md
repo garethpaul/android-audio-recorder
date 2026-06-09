@@ -21,6 +21,7 @@ Priority:
 - Keep audio record/playback behavior easy to inspect
 - Maintain the SDK-free baseline check for quick source verification
 - Keep recorder controls visually aligned with the action they trigger
+- Keep local recorder app state out of Android backups by default
 - Avoid changing external-storage behavior without documenting user impact
 
 Next priorities:

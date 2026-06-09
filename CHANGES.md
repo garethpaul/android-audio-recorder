@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-09
+
+- Disabled Android backup for the recorder app and added an SDK-free manifest
+  contract for the audio privacy baseline.
+
 ## 2026-06-08
 
 - Added `make check` as the root wrapper for recorder source, lint, test, and

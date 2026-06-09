@@ -67,6 +67,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 ## Configuration and Secrets
 
 - No required secret or credential file was identified in the repository scan. If you add integrations later, keep secrets out of git.
+- The recorder disables Android backup in the checked-in manifest so local app
+  state associated with recordings is not backed up by default.
 
 ## Security and Privacy Notes
 
@@ -84,6 +86,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   verification wrapper baseline.
 - See `docs/plans/2026-06-09-recorder-button-icon-contracts.md` for the
   first-render button icon contract.
+- See `docs/plans/2026-06-09-recorder-backup-policy.md` for the manifest
+  backup policy contract.
 
 ## Contributing
 
