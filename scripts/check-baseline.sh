@@ -110,6 +110,21 @@ if grep -Fq "final boolean[] mStartPlaying" "$MAIN_ACTIVITY"; then
   exit 1
 fi
 
+if grep -Fq "final boolean[] mStartRecording" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Recording state must not be hidden in an onCreate-local array." >&2
+  exit 1
+fi
+
+if ! grep -Fq "private boolean mStartRecording = true;" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Recording state must be tracked as an activity field." >&2
+  exit 1
+fi
+
+if ! grep -Fq "private void resetRecordingControls()" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Recording control reset must be centralized." >&2
+  exit 1
+fi
+
 if ! grep -Fq "private void resetPlaybackControls()" "$MAIN_ACTIVITY"; then
   printf '%s\n' "Playback control reset must be centralized." >&2
   exit 1
@@ -147,6 +162,16 @@ fi
 
 if ! grep -Fq "mStartPlaying = true;" "$MAIN_ACTIVITY"; then
   printf '%s\n' "Playback reset must return the play state to idle." >&2
+  exit 1
+fi
+
+if ! grep -Fq "mStartRecording = true;" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Recording reset must return the record state to idle." >&2
+  exit 1
+fi
+
+if ! grep -Fq "resetRecordingControls();" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Recorder lifecycle must reset recording controls after cleanup." >&2
   exit 1
 fi
 
@@ -254,6 +279,11 @@ if ! grep -Fq "playback completion" "$README"; then
   exit 1
 fi
 
+if ! grep -Fq "lifecycle cleanup resets" "$README"; then
+  printf '%s\n' "README must document lifecycle recording-control reset handling." >&2
+  exit 1
+fi
+
 if ! grep -Fq "make check" "$ROOT_DIR/docs/plans/2026-06-09-recorder-startup-ui-state.md"; then
   printf '%s\n' "Recorder startup UI state plan must document make check verification." >&2
   exit 1
@@ -261,6 +291,11 @@ fi
 
 if ! grep -Fq "make check" "$ROOT_DIR/docs/plans/2026-06-09-recorder-playback-completion-ui.md"; then
   printf '%s\n' "Recorder playback completion UI plan must document make check verification." >&2
+  exit 1
+fi
+
+if ! grep -Fq "make check" "$ROOT_DIR/docs/plans/2026-06-09-recorder-recording-lifecycle-reset.md"; then
+  printf '%s\n' "Recorder recording lifecycle reset plan must document make check verification." >&2
   exit 1
 fi
 

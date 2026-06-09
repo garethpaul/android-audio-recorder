@@ -24,6 +24,7 @@ Priority:
 - Keep recorder startup safe when optional UI chrome or controls are missing
 - Keep recorder controls from entering active states when media startup fails
 - Reset playback controls automatically when media playback completes
+- Reset recorder controls when lifecycle cleanup releases recording resources
 - Keep local recorder app state out of Android backups by default
 - Keep recordings in app-specific storage unless a documented user-facing export
   flow is added

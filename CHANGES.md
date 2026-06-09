@@ -2,6 +2,9 @@
 
 ## 2026-06-09
 
+- Moved recording-state tracking out of the record-button listener closure and
+  reset recorder controls during lifecycle cleanup.
+- Added an SDK-free baseline contract for recording-state reset behavior.
 - Guarded recorder startup when the action bar or record/play controls are
   unavailable, with an SDK-free baseline contract.
 - Reset playback controls automatically when media playback completes and added

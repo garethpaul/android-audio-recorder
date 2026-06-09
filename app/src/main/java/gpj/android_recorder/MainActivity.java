@@ -20,6 +20,7 @@ public class MainActivity extends Activity {
 
     private ImageButton mRecordButton = null;
     private MediaRecorder mRecorder = null;
+    private boolean mStartRecording = true;
 
     private ImageButton mPlayButton = null;
     private MediaPlayer mPlayer = null;
@@ -101,6 +102,15 @@ public class MainActivity extends Activity {
         mStartPlaying = true;
     }
 
+    private void resetRecordingControls() {
+        if (mRecordButton != null) {
+            mRecordButton.setVisibility(View.VISIBLE);
+            mRecordButton.setImageResource(R.drawable.record);
+        }
+
+        mStartRecording = true;
+    }
+
     private boolean startRecording() {
         releaseRecorder();
         mRecorder = new MediaRecorder();
@@ -177,23 +187,22 @@ public class MainActivity extends Activity {
             return;
         }
 
-        final boolean[] mStartRecording = {true};
         mRecordButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Do something in response to button click
 
-                if (mStartRecording[0]) {
+                if (mStartRecording) {
                     if (onRecord(true)) {
                         mRecordButton.setVisibility(View.VISIBLE);
                         mRecordButton.setImageResource(R.drawable.stop);
-                        mStartRecording[0] = false;
+                        mStartRecording = false;
                     }
                 } else {
                     onRecord(false);
                     mRecordButton.setVisibility(View.INVISIBLE);
                     mPlayButton.setVisibility(View.VISIBLE);
                     mPlayButton.setImageResource(R.drawable.play);
-                    mStartRecording[0] = true;
+                    mStartRecording = true;
                 }
             }
         });
@@ -228,5 +237,8 @@ public class MainActivity extends Activity {
         if (mPlayer != null) {
             releasePlayer();
         }
+
+        resetRecordingControls();
+        resetPlaybackControls();
     }
 }
