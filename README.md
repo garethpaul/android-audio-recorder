@@ -58,6 +58,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - `make check` - runs the source baseline and Android SDK-backed Gradle checks
   when `ANDROID_HOME` is configured
 - `scripts/check-baseline.sh` - runs SDK-free recorder baseline checks
+- The baseline check protects media cleanup, play/record dispatch, and
+  first-render button icon state.
 - `./gradlew lint --no-daemon`, `./gradlew test --no-daemon`, and `./gradlew assembleDebug --no-daemon` when the Android SDK is configured
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
@@ -80,6 +82,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - See `VISION.md` for project direction and contribution guardrails.
 - See `docs/plans/2026-06-08-recorder-check-wrapper.md` for the root
   verification wrapper baseline.
+- See `docs/plans/2026-06-09-recorder-button-icon-contracts.md` for the
+  first-render button icon contract.
 
 ## Contributing
 

@@ -7,6 +7,34 @@ LAYOUT="$ROOT_DIR/app/src/main/res/layout/activity_main.xml"
 README="$ROOT_DIR/README.md"
 RES_DIR="$ROOT_DIR/app/src/main/res"
 
+require_button_attribute() {
+  button_id=$1
+  attribute=$2
+  message=$3
+
+  if ! awk -v button_id="android:id=\"@+id/$button_id\"" -v attribute="$attribute" '
+    /<ImageButton/ {
+      in_button = 1
+      block = ""
+    }
+    in_button {
+      block = block $0 "\n"
+    }
+    in_button && /\/>/ {
+      if (index(block, button_id) && index(block, attribute)) {
+        found = 1
+      }
+      in_button = 0
+    }
+    END {
+      exit found ? 0 : 1
+    }
+  ' "$LAYOUT"; then
+    printf '%s\n' "$message" >&2
+    exit 1
+  fi
+}
+
 if grep -Fq "onPlay(mStartPlaying[0]);" "$MAIN_ACTIVITY"; then
   printf '%s\n' "Play button must not dispatch onPlay before branch-specific UI updates." >&2
   exit 1
@@ -73,6 +101,13 @@ if ! grep -Fq 'android:contentDescription="@string/play_button_description"' "$L
   printf '%s\n' "Play button must have an accessibility description." >&2
   exit 1
 fi
+
+require_button_attribute "record" 'android:src="@drawable/record"' \
+  "Record button must start with the record icon."
+require_button_attribute "play" 'android:src="@drawable/play"' \
+  "Play button must start with the play icon."
+require_button_attribute "play" 'android:visibility="invisible"' \
+  "Play button must remain hidden until a recording exists."
 
 if ! grep -Fq "LintError" "$ROOT_DIR/app/lint.xml"; then
   printf '%s\n' "lint.xml must document the obsolete lint API database limitation." >&2

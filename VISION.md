@@ -20,6 +20,7 @@ Priority:
 - Preserve the documented Gradle 2.2.1 and Android Gradle Plugin 1.2.3 stack
 - Keep audio record/playback behavior easy to inspect
 - Maintain the SDK-free baseline check for quick source verification
+- Keep recorder controls visually aligned with the action they trigger
 - Avoid changing external-storage behavior without documenting user impact
 
 Next priorities:

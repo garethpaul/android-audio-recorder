@@ -13,3 +13,5 @@
   overdraw.
 - Added recorder/player cleanup contracts so failed media prepare/start/stop
   paths release resources predictably.
+- Corrected the recorder's initial record/play button icons and added an
+  SDK-free baseline guard for the first-render button state.
