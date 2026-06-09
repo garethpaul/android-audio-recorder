@@ -2,6 +2,8 @@
 
 ## 2026-06-09
 
+- Kept recorder controls in their idle state when media recording or playback
+  startup fails, with an SDK-free contract for the success-gated UI transition.
 - Disabled Android backup for the recorder app and added an SDK-free manifest
   contract for the audio privacy baseline.
 - Moved recordings into app-specific storage with an internal fallback and

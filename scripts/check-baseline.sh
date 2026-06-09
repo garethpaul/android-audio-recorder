@@ -75,13 +75,43 @@ if ! grep -Fq "getFilesDir()" "$MAIN_ACTIVITY"; then
   exit 1
 fi
 
-if ! grep -Fq "onPlay(true);" "$MAIN_ACTIVITY"; then
+if ! grep -Fq "onPlay(true)" "$MAIN_ACTIVITY"; then
   printf '%s\n' "Play-start branch must call onPlay(true)." >&2
   exit 1
 fi
 
-if ! grep -Fq "onPlay(false);" "$MAIN_ACTIVITY"; then
+if ! grep -Fq "onPlay(false)" "$MAIN_ACTIVITY"; then
   printf '%s\n' "Play-stop branch must call onPlay(false)." >&2
+  exit 1
+fi
+
+if ! grep -Fq "private boolean onRecord(boolean start)" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Record dispatch must report whether media startup succeeded." >&2
+  exit 1
+fi
+
+if ! grep -Fq "private boolean onPlay(boolean start)" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Play dispatch must report whether media startup succeeded." >&2
+  exit 1
+fi
+
+if ! grep -Fq "private boolean startRecording()" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "startRecording must return a success flag." >&2
+  exit 1
+fi
+
+if ! grep -Fq "private boolean startPlaying()" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "startPlaying must return a success flag." >&2
+  exit 1
+fi
+
+if ! grep -Fq "if (onRecord(true))" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Record UI must only enter recording state after startup succeeds." >&2
+  exit 1
+fi
+
+if ! grep -Fq "if (onPlay(true))" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Play UI must only enter playback state after startup succeeds." >&2
   exit 1
 fi
 
@@ -166,6 +196,16 @@ fi
 
 if ! grep -Fq "./gradlew assembleDebug --no-daemon" "$README"; then
   printf '%s\n' "README must document Gradle build verification." >&2
+  exit 1
+fi
+
+if ! grep -Fq "record/play startup failures" "$README"; then
+  printf '%s\n' "README must document recorder startup-failure UI handling." >&2
+  exit 1
+fi
+
+if ! grep -Fq "make check" "$ROOT_DIR/docs/plans/2026-06-09-recorder-startup-ui-state.md"; then
+  printf '%s\n' "Recorder startup UI state plan must document make check verification." >&2
   exit 1
 fi
 

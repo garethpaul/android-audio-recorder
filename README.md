@@ -60,6 +60,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - `scripts/check-baseline.sh` - runs SDK-free recorder baseline checks
 - The baseline check protects media cleanup, play/record dispatch, and
   first-render button icon state.
+- Recorder controls remain in their idle state after record/play startup failures
+  instead of switching to active recording or playback controls.
 - `./gradlew lint --no-daemon`, `./gradlew test --no-daemon`, and `./gradlew assembleDebug --no-daemon` when the Android SDK is configured
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
@@ -92,6 +94,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   backup policy contract.
 - See `docs/plans/2026-06-09-recorder-app-specific-storage.md` for the
   recording storage contract.
+- See `docs/plans/2026-06-09-recorder-startup-ui-state.md` for the media
+  startup-failure UI state contract.
 
 ## Contributing
 

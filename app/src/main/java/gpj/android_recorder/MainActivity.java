@@ -23,29 +23,32 @@ public class MainActivity extends Activity {
     private ImageButton mPlayButton = null;
     private MediaPlayer mPlayer = null;
 
-    private void onRecord(boolean start) {
+    private boolean onRecord(boolean start) {
         if (start) {
-            startRecording();
-        } else {
-            stopRecording();
+            return startRecording();
         }
+
+        stopRecording();
+        return true;
     }
 
-    private void onPlay(boolean start) {
+    private boolean onPlay(boolean start) {
         if (start) {
-            startPlaying();
-        } else {
-            stopPlaying();
+            return startPlaying();
         }
+
+        stopPlaying();
+        return true;
     }
 
-    private void startPlaying() {
+    private boolean startPlaying() {
         releasePlayer();
         mPlayer = new MediaPlayer();
         try {
             mPlayer.setDataSource(mFileName);
             mPlayer.prepare();
             mPlayer.start();
+            return true;
         } catch (IOException e) {
             Log.e(LOG_TAG, "prepare() failed");
             releasePlayer();
@@ -53,6 +56,8 @@ public class MainActivity extends Activity {
             Log.e(LOG_TAG, "startPlaying() failed");
             releasePlayer();
         }
+
+        return false;
     }
 
     private void stopPlaying() {
@@ -74,7 +79,7 @@ public class MainActivity extends Activity {
         mPlayer = null;
     }
 
-    private void startRecording() {
+    private boolean startRecording() {
         releaseRecorder();
         mRecorder = new MediaRecorder();
         mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
@@ -85,6 +90,7 @@ public class MainActivity extends Activity {
         try {
             mRecorder.prepare();
             mRecorder.start();
+            return true;
         } catch (IOException e) {
             Log.e(LOG_TAG, "prepare() failed");
             releaseRecorder();
@@ -92,6 +98,8 @@ public class MainActivity extends Activity {
             Log.e(LOG_TAG, "startRecording() failed");
             releaseRecorder();
         }
+
+        return false;
     }
 
     private void stopRecording() {
@@ -144,16 +152,18 @@ public class MainActivity extends Activity {
                 // Do something in response to button click
 
                 if (mStartRecording[0]) {
-                    startRecording();
-                    mRecordButton.setVisibility(View.VISIBLE);
-                    mRecordButton.setImageResource(R.drawable.stop);
+                    if (onRecord(true)) {
+                        mRecordButton.setVisibility(View.VISIBLE);
+                        mRecordButton.setImageResource(R.drawable.stop);
+                        mStartRecording[0] = false;
+                    }
                 } else {
-                    stopRecording();
+                    onRecord(false);
                     mRecordButton.setVisibility(View.INVISIBLE);
                     mPlayButton.setVisibility(View.VISIBLE);
                     mPlayButton.setImageResource(R.drawable.play);
+                    mStartRecording[0] = true;
                 }
-                mStartRecording[0] = !mStartRecording[0];
             }
         });
 
@@ -163,16 +173,18 @@ public class MainActivity extends Activity {
         mPlayButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (mStartPlaying[0]) {
-                    onPlay(true);
-                    mPlayButton.setVisibility(View.VISIBLE);
-                    mPlayButton.setImageResource(R.drawable.stop);
+                    if (onPlay(true)) {
+                        mPlayButton.setVisibility(View.VISIBLE);
+                        mPlayButton.setImageResource(R.drawable.stop);
+                        mStartPlaying[0] = false;
+                    }
                 } else {
                     onPlay(false);
                     mPlayButton.setVisibility(View.INVISIBLE);
                     mRecordButton.setVisibility(View.VISIBLE);
                     mRecordButton.setImageResource(R.drawable.record);
+                    mStartPlaying[0] = true;
                 }
-                mStartPlaying[0] = !mStartPlaying[0];
             }
         });
 
