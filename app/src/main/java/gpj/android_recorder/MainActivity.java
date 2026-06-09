@@ -4,17 +4,18 @@ import android.app.Activity;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 
+import java.io.File;
 import java.io.IOException;
 
 public class MainActivity extends Activity {
 
     private static final String LOG_TAG = "AudioRecordTest";
-    private static String mFileName = null;
+    private static final String RECORDING_FILE_NAME = "audiorecordtest.3gp";
+    private String mFileName = null;
 
     private ImageButton mRecordButton = null;
     private MediaRecorder mRecorder = null;
@@ -112,14 +113,24 @@ public class MainActivity extends Activity {
         mRecorder = null;
     }
 
-    public MainActivity() {
-        mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
-        mFileName += "/audiorecordtest.3gp";
+    private File recordingDirectory() {
+        File directory = getExternalFilesDir(null);
+        if (directory == null) {
+            directory = getFilesDir();
+        }
+        return directory;
+    }
+
+    private void configureRecordingFile() {
+        mFileName = new File(
+                recordingDirectory(),
+                RECORDING_FILE_NAME).getAbsolutePath();
     }
 
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+        configureRecordingFile();
 
         getActionBar().setDisplayShowTitleEnabled(false);
         getActionBar().setIcon(R.drawable.logo);

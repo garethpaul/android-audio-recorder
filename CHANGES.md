@@ -4,6 +4,8 @@
 
 - Disabled Android backup for the recorder app and added an SDK-free manifest
   contract for the audio privacy baseline.
+- Moved recordings into app-specific storage with an internal fallback and
+  removed the broad `WRITE_EXTERNAL_STORAGE` permission.
 
 ## 2026-06-08
 

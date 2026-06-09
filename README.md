@@ -69,6 +69,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - No required secret or credential file was identified in the repository scan. If you add integrations later, keep secrets out of git.
 - The recorder disables Android backup in the checked-in manifest so local app
   state associated with recordings is not backed up by default.
+- Recordings are stored under app-specific external files with an internal
+  storage fallback; the checked-in manifest keeps only microphone permission.
 
 ## Security and Privacy Notes
 
@@ -88,6 +90,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   first-render button icon contract.
 - See `docs/plans/2026-06-09-recorder-backup-policy.md` for the manifest
   backup policy contract.
+- See `docs/plans/2026-06-09-recorder-app-specific-storage.md` for the
+  recording storage contract.
 
 ## Contributing
 

@@ -50,6 +50,31 @@ if grep -Fq 'android:allowBackup="true"' "$ROOT_DIR/app/src/main/AndroidManifest
   exit 1
 fi
 
+if grep -Fq 'android.permission.WRITE_EXTERNAL_STORAGE' "$ROOT_DIR/app/src/main/AndroidManifest.xml"; then
+  printf '%s\n' "Recorder must not request broad external storage writes." >&2
+  exit 1
+fi
+
+if ! grep -Fq 'android.permission.RECORD_AUDIO' "$ROOT_DIR/app/src/main/AndroidManifest.xml"; then
+  printf '%s\n' "Recorder must keep the microphone permission explicit." >&2
+  exit 1
+fi
+
+if grep -Fq "Environment.getExternalStorageDirectory()" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Recorder must not write recordings to the external storage root." >&2
+  exit 1
+fi
+
+if ! grep -Fq "getExternalFilesDir(null)" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Recorder must store recordings under app-specific external files." >&2
+  exit 1
+fi
+
+if ! grep -Fq "getFilesDir()" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Recorder must fall back to app-internal storage when external files are unavailable." >&2
+  exit 1
+fi
+
 if ! grep -Fq "onPlay(true);" "$MAIN_ACTIVITY"; then
   printf '%s\n' "Play-start branch must call onPlay(true)." >&2
   exit 1

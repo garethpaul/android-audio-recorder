@@ -22,7 +22,8 @@ Priority:
 - Maintain the SDK-free baseline check for quick source verification
 - Keep recorder controls visually aligned with the action they trigger
 - Keep local recorder app state out of Android backups by default
-- Avoid changing external-storage behavior without documenting user impact
+- Keep recordings in app-specific storage unless a documented user-facing export
+  flow is added
 
 Next priorities:
 
