@@ -22,6 +22,7 @@ public class MainActivity extends Activity {
 
     private ImageButton mPlayButton = null;
     private MediaPlayer mPlayer = null;
+    private boolean mStartPlaying = true;
 
     private boolean onRecord(boolean start) {
         if (start) {
@@ -47,6 +48,12 @@ public class MainActivity extends Activity {
         try {
             mPlayer.setDataSource(mFileName);
             mPlayer.prepare();
+            mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                public void onCompletion(MediaPlayer mp) {
+                    releasePlayer();
+                    resetPlaybackControls();
+                }
+            });
             mPlayer.start();
             return true;
         } catch (IOException e) {
@@ -77,6 +84,20 @@ public class MainActivity extends Activity {
             mPlayer.release();
         }
         mPlayer = null;
+    }
+
+    private void resetPlaybackControls() {
+        if (mPlayButton != null) {
+            mPlayButton.setVisibility(View.INVISIBLE);
+            mPlayButton.setImageResource(R.drawable.play);
+        }
+
+        if (mRecordButton != null) {
+            mRecordButton.setVisibility(View.VISIBLE);
+            mRecordButton.setImageResource(R.drawable.record);
+        }
+
+        mStartPlaying = true;
     }
 
     private boolean startRecording() {
@@ -167,23 +188,18 @@ public class MainActivity extends Activity {
             }
         });
 
-
-        final boolean[] mStartPlaying = {true};
         mPlayButton = (ImageButton) findViewById(R.id.play);
         mPlayButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (mStartPlaying[0]) {
+                if (mStartPlaying) {
                     if (onPlay(true)) {
                         mPlayButton.setVisibility(View.VISIBLE);
                         mPlayButton.setImageResource(R.drawable.stop);
-                        mStartPlaying[0] = false;
+                        mStartPlaying = false;
                     }
                 } else {
                     onPlay(false);
-                    mPlayButton.setVisibility(View.INVISIBLE);
-                    mRecordButton.setVisibility(View.VISIBLE);
-                    mRecordButton.setImageResource(R.drawable.record);
-                    mStartPlaying[0] = true;
+                    resetPlaybackControls();
                 }
             }
         });

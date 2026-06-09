@@ -62,6 +62,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   first-render button icon state.
 - Recorder controls remain in their idle state after record/play startup failures
   instead of switching to active recording or playback controls.
+- Playback completion resets the play control to idle and releases the player
+  without requiring an extra stop tap.
 - `./gradlew lint --no-daemon`, `./gradlew test --no-daemon`, and `./gradlew assembleDebug --no-daemon` when the Android SDK is configured
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
@@ -96,6 +98,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   recording storage contract.
 - See `docs/plans/2026-06-09-recorder-startup-ui-state.md` for the media
   startup-failure UI state contract.
+- See `docs/plans/2026-06-09-recorder-playback-completion-ui.md` for the
+  playback completion UI reset contract.
 
 ## Contributing
 

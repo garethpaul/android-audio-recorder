@@ -105,6 +105,31 @@ if ! grep -Fq "private boolean startPlaying()" "$MAIN_ACTIVITY"; then
   exit 1
 fi
 
+if grep -Fq "final boolean[] mStartPlaying" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Playback state must not be hidden in an onCreate-local array." >&2
+  exit 1
+fi
+
+if ! grep -Fq "private void resetPlaybackControls()" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Playback control reset must be centralized." >&2
+  exit 1
+fi
+
+if ! grep -Fq "mPlayer.setOnCompletionListener" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Playback must reset controls when media completes." >&2
+  exit 1
+fi
+
+if ! grep -Fq "public void onCompletion(MediaPlayer mp)" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Playback completion listener must handle MediaPlayer completion." >&2
+  exit 1
+fi
+
+if ! grep -Fq "mStartPlaying = true;" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Playback reset must return the play state to idle." >&2
+  exit 1
+fi
+
 if ! grep -Fq "if (onRecord(true))" "$MAIN_ACTIVITY"; then
   printf '%s\n' "Record UI must only enter recording state after startup succeeds." >&2
   exit 1
@@ -204,8 +229,18 @@ if ! grep -Fq "record/play startup failures" "$README"; then
   exit 1
 fi
 
+if ! grep -Fq "playback completion" "$README"; then
+  printf '%s\n' "README must document playback completion UI handling." >&2
+  exit 1
+fi
+
 if ! grep -Fq "make check" "$ROOT_DIR/docs/plans/2026-06-09-recorder-startup-ui-state.md"; then
   printf '%s\n' "Recorder startup UI state plan must document make check verification." >&2
+  exit 1
+fi
+
+if ! grep -Fq "make check" "$ROOT_DIR/docs/plans/2026-06-09-recorder-playback-completion-ui.md"; then
+  printf '%s\n' "Recorder playback completion UI plan must document make check verification." >&2
   exit 1
 fi
 

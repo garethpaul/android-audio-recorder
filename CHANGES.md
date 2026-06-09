@@ -2,6 +2,8 @@
 
 ## 2026-06-09
 
+- Reset playback controls automatically when media playback completes and added
+  an SDK-free contract for the completion listener.
 - Kept recorder controls in their idle state when media recording or playback
   startup fails, with an SDK-free contract for the success-gated UI transition.
 - Disabled Android backup for the recorder app and added an SDK-free manifest
