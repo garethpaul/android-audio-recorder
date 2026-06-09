@@ -60,6 +60,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - `scripts/check-baseline.sh` - runs SDK-free recorder baseline checks
 - The baseline check protects media cleanup, play/record dispatch, and
   first-render button icon state.
+- Recorder startup guards optional action-bar and record/play control lookups
+  before wiring button listeners.
 - Recorder controls remain in their idle state after record/play startup failures
   instead of switching to active recording or playback controls.
 - Playback completion resets the play control to idle and releases the player
@@ -92,6 +94,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   verification wrapper baseline.
 - See `docs/plans/2026-06-09-recorder-button-icon-contracts.md` for the
   first-render button icon contract.
+- See `docs/plans/2026-06-09-recorder-startup-control-guards.md` for action-bar
+  and record/play control lookup guards.
 - See `docs/plans/2026-06-09-recorder-backup-policy.md` for the manifest
   backup policy contract.
 - See `docs/plans/2026-06-09-recorder-app-specific-storage.md` for the

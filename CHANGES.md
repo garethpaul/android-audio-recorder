@@ -2,6 +2,8 @@
 
 ## 2026-06-09
 
+- Guarded recorder startup when the action bar or record/play controls are
+  unavailable, with an SDK-free baseline contract.
 - Reset playback controls automatically when media playback completes and added
   an SDK-free contract for the completion listener.
 - Kept recorder controls in their idle state when media recording or playback

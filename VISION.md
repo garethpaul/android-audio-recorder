@@ -21,6 +21,7 @@ Priority:
 - Keep audio record/playback behavior easy to inspect
 - Maintain the SDK-free baseline check for quick source verification
 - Keep recorder controls visually aligned with the action they trigger
+- Keep recorder startup safe when optional UI chrome or controls are missing
 - Keep recorder controls from entering active states when media startup fails
 - Reset playback controls automatically when media playback completes
 - Keep local recorder app state out of Android backups by default

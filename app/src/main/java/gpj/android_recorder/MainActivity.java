@@ -1,6 +1,7 @@
 package gpj.android_recorder;
 
 import android.app.Activity;
+import android.app.ActionBar;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
@@ -161,13 +162,22 @@ public class MainActivity extends Activity {
         super.onCreate(icicle);
         configureRecordingFile();
 
-        getActionBar().setDisplayShowTitleEnabled(false);
-        getActionBar().setIcon(R.drawable.logo);
+        ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayShowTitleEnabled(false);
+            actionBar.setIcon(R.drawable.logo);
+        }
 
         setContentView(R.layout.activity_main);
 
-        final boolean[] mStartRecording = {true};
         mRecordButton = (ImageButton) findViewById(R.id.record);
+        mPlayButton = (ImageButton) findViewById(R.id.play);
+        if (mRecordButton == null || mPlayButton == null) {
+            Log.e(LOG_TAG, "Recorder controls are not available");
+            return;
+        }
+
+        final boolean[] mStartRecording = {true};
         mRecordButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Do something in response to button click
@@ -188,7 +198,6 @@ public class MainActivity extends Activity {
             }
         });
 
-        mPlayButton = (ImageButton) findViewById(R.id.play);
         mPlayButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (mStartPlaying) {

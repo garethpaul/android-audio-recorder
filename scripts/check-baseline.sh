@@ -115,6 +115,26 @@ if ! grep -Fq "private void resetPlaybackControls()" "$MAIN_ACTIVITY"; then
   exit 1
 fi
 
+if ! grep -Fq "ActionBar actionBar = getActionBar();" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Recorder startup must store the optional action bar before use." >&2
+  exit 1
+fi
+
+if ! grep -Fq "if (actionBar != null)" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Recorder startup must guard missing action bars." >&2
+  exit 1
+fi
+
+if ! grep -Fq "if (mRecordButton == null || mPlayButton == null)" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Recorder startup must guard missing record/play buttons." >&2
+  exit 1
+fi
+
+if ! grep -Fq '"Recorder controls are not available"' "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Recorder startup must log missing control lookups." >&2
+  exit 1
+fi
+
 if ! grep -Fq "mPlayer.setOnCompletionListener" "$MAIN_ACTIVITY"; then
   printf '%s\n' "Playback must reset controls when media completes." >&2
   exit 1
