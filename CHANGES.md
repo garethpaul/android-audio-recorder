@@ -2,6 +2,8 @@
 
 ## 2026-06-09
 
+- Reset playback controls and release the player when media playback reports an
+  error, with an SDK-free baseline contract.
 - Moved recording-state tracking out of the record-button listener closure and
   reset recorder controls during lifecycle cleanup.
 - Added an SDK-free baseline contract for recording-state reset behavior.

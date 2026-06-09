@@ -68,6 +68,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   state so released media resources do not leave stale stop controls on screen.
 - Playback completion resets the play control to idle and releases the player
   without requiring an extra stop tap.
+- Recorder playback errors release the player and reset controls to idle rather
+  than leaving the stop icon visible for a failed playback session.
 - `./gradlew lint --no-daemon`, `./gradlew test --no-daemon`, and `./gradlew assembleDebug --no-daemon` when the Android SDK is configured
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
@@ -108,6 +110,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   playback completion UI reset contract.
 - See `docs/plans/2026-06-09-recorder-recording-lifecycle-reset.md` for the
   recording-state lifecycle reset contract.
+- See `docs/plans/2026-06-09-recorder-playback-error-ui.md` for the playback
+  error UI reset contract.
 
 ## Contributing
 

@@ -160,6 +160,40 @@ if ! grep -Fq "public void onCompletion(MediaPlayer mp)" "$MAIN_ACTIVITY"; then
   exit 1
 fi
 
+if ! grep -Fq "mPlayer.setOnErrorListener" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Playback must reset controls when media playback errors." >&2
+  exit 1
+fi
+
+if ! grep -Fq "public boolean onError(MediaPlayer mp, int what, int extra)" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Playback error listener must handle MediaPlayer errors." >&2
+  exit 1
+fi
+
+if ! awk '
+  /public boolean onError\(MediaPlayer mp, int what, int extra\)/ {
+    in_error = 1
+  }
+  in_error && /releasePlayer\(\);/ {
+    found_release = 1
+  }
+  in_error && /resetPlaybackControls\(\);/ {
+    found_reset = 1
+  }
+  in_error && /return true;/ {
+    found_return = 1
+  }
+  in_error && /^                }$/ {
+    exit found_release && found_reset && found_return ? 0 : 1
+  }
+  END {
+    exit found_release && found_reset && found_return ? 0 : 1
+  }
+' "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Playback error listener must release, reset, and consume handled errors." >&2
+  exit 1
+fi
+
 if ! grep -Fq "mStartPlaying = true;" "$MAIN_ACTIVITY"; then
   printf '%s\n' "Playback reset must return the play state to idle." >&2
   exit 1
@@ -279,6 +313,11 @@ if ! grep -Fq "playback completion" "$README"; then
   exit 1
 fi
 
+if ! grep -Fq "playback errors" "$README"; then
+  printf '%s\n' "README must document playback error UI handling." >&2
+  exit 1
+fi
+
 if ! grep -Fq "lifecycle cleanup resets" "$README"; then
   printf '%s\n' "README must document lifecycle recording-control reset handling." >&2
   exit 1
@@ -296,6 +335,11 @@ fi
 
 if ! grep -Fq "make check" "$ROOT_DIR/docs/plans/2026-06-09-recorder-recording-lifecycle-reset.md"; then
   printf '%s\n' "Recorder recording lifecycle reset plan must document make check verification." >&2
+  exit 1
+fi
+
+if ! grep -Fq "make check" "$ROOT_DIR/docs/plans/2026-06-09-recorder-playback-error-ui.md"; then
+  printf '%s\n' "Recorder playback error UI plan must document make check verification." >&2
   exit 1
 fi
 

@@ -56,6 +56,14 @@ public class MainActivity extends Activity {
                     resetPlaybackControls();
                 }
             });
+            mPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                public boolean onError(MediaPlayer mp, int what, int extra) {
+                    Log.e(LOG_TAG, "playback error");
+                    releasePlayer();
+                    resetPlaybackControls();
+                    return true;
+                }
+            });
             mPlayer.start();
             return true;
         } catch (IOException e) {
