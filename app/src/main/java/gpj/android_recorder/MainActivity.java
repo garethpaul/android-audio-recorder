@@ -31,8 +31,7 @@ public class MainActivity extends Activity {
             return startRecording();
         }
 
-        stopRecording();
-        return true;
+        return stopRecording();
     }
 
     private boolean onPlay(boolean start) {
@@ -142,16 +141,19 @@ public class MainActivity extends Activity {
         return false;
     }
 
-    private void stopRecording() {
+    private boolean stopRecording() {
+        boolean stopped = false;
         if (mRecorder != null) {
             try {
                 mRecorder.stop();
+                stopped = true;
             } catch (RuntimeException e) {
                 Log.e(LOG_TAG, "stopRecording() failed");
             }
         }
 
         releaseRecorder();
+        return stopped;
     }
 
     private void releaseRecorder() {
@@ -206,11 +208,15 @@ public class MainActivity extends Activity {
                         mStartRecording = false;
                     }
                 } else {
-                    onRecord(false);
-                    mRecordButton.setVisibility(View.INVISIBLE);
-                    mPlayButton.setVisibility(View.VISIBLE);
-                    mPlayButton.setImageResource(R.drawable.play);
-                    mStartRecording = true;
+                    if (onRecord(false)) {
+                        mRecordButton.setVisibility(View.INVISIBLE);
+                        mPlayButton.setVisibility(View.VISIBLE);
+                        mPlayButton.setImageResource(R.drawable.play);
+                        mStartRecording = true;
+                    } else {
+                        resetRecordingControls();
+                        resetPlaybackControls();
+                    }
                 }
             }
         });

@@ -216,6 +216,23 @@ if ! grep -Fq "if (onRecord(true))" "$MAIN_ACTIVITY"; then
   exit 1
 fi
 
+if ! grep -Fq "return stopRecording();" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Recorder stop results must propagate through onRecord()." >&2
+  exit 1
+fi
+
+for stop_contract in \
+  "private boolean stopRecording()" \
+  "boolean stopped = false;" \
+  "stopped = true;" \
+  "return stopped;" \
+  "if (onRecord(false))"; do
+  if ! grep -Fq "$stop_contract" "$MAIN_ACTIVITY"; then
+    printf '%s\n' "Recorder finalization must keep contract: $stop_contract" >&2
+    exit 1
+  fi
+done
+
 if ! grep -Fq "if (onPlay(true))" "$MAIN_ACTIVITY"; then
   printf '%s\n' "Play UI must only enter playback state after startup succeeds." >&2
   exit 1
@@ -380,6 +397,11 @@ if ! grep -Fq "lifecycle cleanup resets" "$README"; then
   exit 1
 fi
 
+if ! grep -Fq "recording finalization failures" "$README"; then
+  printf '%s\n' "README must document recording finalization failure handling." >&2
+  exit 1
+fi
+
 if ! grep -Fq "make check" "$ROOT_DIR/docs/plans/2026-06-09-recorder-startup-ui-state.md"; then
   printf '%s\n' "Recorder startup UI state plan must document make check verification." >&2
   exit 1
@@ -397,6 +419,12 @@ fi
 
 if ! grep -Fq "make check" "$ROOT_DIR/docs/plans/2026-06-09-recorder-playback-error-ui.md"; then
   printf '%s\n' "Recorder playback error UI plan must document make check verification." >&2
+  exit 1
+fi
+
+if ! grep -Fq "Status: Completed" "$ROOT_DIR/docs/plans/2026-06-10-recorder-stop-result.md" || \
+   ! grep -Fq "make check" "$ROOT_DIR/docs/plans/2026-06-10-recorder-stop-result.md"; then
+  printf '%s\n' "Recorder stop-result plan must record completed status and make check verification." >&2
   exit 1
 fi
 

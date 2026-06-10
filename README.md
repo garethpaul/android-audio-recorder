@@ -75,6 +75,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   state so released media resources do not leave stale stop controls on screen.
 - Recorder lifecycle cleanup routes active capture and playback through guarded
   stop methods before release, allowing recording containers to finalize.
+- Recorder controls keep playback hidden after recording finalization failures
+  instead of presenting an incomplete capture as playable.
 - Playback completion resets the play control to idle and releases the player
   without requiring an extra stop tap.
 - Recorder playback errors release the player and reset controls to idle rather

@@ -4,6 +4,8 @@
 
 - Routed pause-time media cleanup through guarded recorder/player stop methods
   so active recording containers can finalize before release.
+- Propagated recorder stop failures to the control state so incomplete captures
+  are not exposed for playback.
 - Made root checks location-independent, accepted `ANDROID_SDK_ROOT`, and
   pinned CI to Ubuntu 24.04 with superseded-run cancellation.
 - Added a lightweight GitHub Actions workflow that runs `make check` for the
