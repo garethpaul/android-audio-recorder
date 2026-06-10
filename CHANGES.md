@@ -1,5 +1,14 @@
 # Changes
 
+## 2026-06-10
+
+- Added a lightweight GitHub Actions workflow that runs `make check` for the
+  recorder source baseline with immutable checkout, read-only permissions, and
+  a bounded timeout.
+- Extended the SDK-free baseline to require the CI workflow and completed CI
+  plan.
+- Removed the maintainer-specific Android SDK path from the Makefile.
+
 ## 2026-06-09
 
 - Reset playback controls and release the player when media playback reports an

@@ -6,6 +6,8 @@ MAIN_ACTIVITY="$ROOT_DIR/app/src/main/java/gpj/android_recorder/MainActivity.jav
 LAYOUT="$ROOT_DIR/app/src/main/res/layout/activity_main.xml"
 README="$ROOT_DIR/README.md"
 RES_DIR="$ROOT_DIR/app/src/main/res"
+CI_PLAN="$ROOT_DIR/docs/plans/2026-06-10-ci-baseline.md"
+CI_WORKFLOW="$ROOT_DIR/.github/workflows/check.yml"
 
 require_button_attribute() {
   button_id=$1
@@ -239,6 +241,34 @@ if [ ! -f "$ROOT_DIR/CHANGES.md" ]; then
   exit 1
 fi
 
+if [ ! -f "$CI_WORKFLOW" ]; then
+  printf '%s\n' "GitHub Actions check workflow is missing." >&2
+  exit 1
+fi
+
+for workflow_contract in \
+  "permissions:" \
+  "contents: read" \
+  "timeout-minutes: 5" \
+  "workflow_dispatch:" \
+  "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10" \
+  "make check"; do
+  if ! grep -Fq "$workflow_contract" "$CI_WORKFLOW"; then
+    printf '%s\n' "GitHub Actions check workflow must keep contract: $workflow_contract" >&2
+    exit 1
+  fi
+done
+
+if grep -Fq "/home/gjones" "$ROOT_DIR/Makefile"; then
+  printf '%s\n' "Makefile must not embed a maintainer-specific Android SDK path." >&2
+  exit 1
+fi
+
+if ! grep -Fq "GitHub Actions" "$README"; then
+  printf '%s\n' "README must document the GitHub Actions check." >&2
+  exit 1
+fi
+
 if [ -f "$ROOT_DIR/app/src/main/res/menu/menu_main.xml" ]; then
   printf '%s\n' "Unused starter menu resource must not be restored." >&2
   exit 1
@@ -340,6 +370,16 @@ fi
 
 if ! grep -Fq "make check" "$ROOT_DIR/docs/plans/2026-06-09-recorder-playback-error-ui.md"; then
   printf '%s\n' "Recorder playback error UI plan must document make check verification." >&2
+  exit 1
+fi
+
+if [ ! -f "$CI_PLAN" ]; then
+  printf '%s\n' "Recorder CI baseline plan is missing." >&2
+  exit 1
+fi
+
+if ! grep -Fq "Status: Completed" "$CI_PLAN" || ! grep -Fq "make check" "$CI_PLAN"; then
+  printf '%s\n' "Recorder CI baseline plan must record completed status and make check verification." >&2
   exit 1
 fi
 

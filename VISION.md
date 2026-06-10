@@ -29,6 +29,7 @@ Priority:
 - Keep local recorder app state out of Android backups by default
 - Keep recordings in app-specific storage unless a documented user-facing export
   flow is added
+- Keep the SDK-free `make check` baseline running in GitHub Actions
 
 Next priorities:
 

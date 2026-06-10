@@ -12,6 +12,7 @@ This README is based on the checked-in source, manifests, scripts, and repositor
 ## Repository Contents
 
 - `README.md` - project overview and local usage notes
+- `.github/workflows/check.yml` - GitHub Actions baseline for `make check`
 - `build.gradle` - Android or Gradle build configuration
 - `app` - source or example code
 - `docs` - source or example code
@@ -58,6 +59,11 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - `make check` - runs the source baseline and Android SDK-backed Gradle checks
   when `ANDROID_HOME` is configured
 - `scripts/check-baseline.sh` - runs SDK-free recorder baseline checks
+- GitHub Actions runs `make check` on pushes and pull requests. On hosted
+  Linux runners without the legacy Android SDK, the SDK-free baseline still
+  runs and Gradle gates report clear skips.
+- Local Gradle checks require an explicit `ANDROID_HOME`; the repository does
+  not assume a maintainer-specific SDK location.
 - The baseline check protects media cleanup, play/record dispatch, and
   first-render button icon state.
 - Recorder startup guards optional action-bar and record/play control lookups
@@ -112,6 +118,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   recording-state lifecycle reset contract.
 - See `docs/plans/2026-06-09-recorder-playback-error-ui.md` for the playback
   error UI reset contract.
+- See `docs/plans/2026-06-10-ci-baseline.md` for the lightweight GitHub
+  Actions baseline.
 
 ## Contributing
 
