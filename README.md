@@ -57,13 +57,14 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 ## Testing and Verification
 
 - `make check` - runs the source baseline and Android SDK-backed Gradle checks
-  when `ANDROID_HOME` is configured
+  when `ANDROID_HOME` or `ANDROID_SDK_ROOT` is configured
 - `scripts/check-baseline.sh` - runs SDK-free recorder baseline checks
 - GitHub Actions runs `make check` on pushes and pull requests. On hosted
   Linux runners without the legacy Android SDK, the SDK-free baseline still
-  runs and Gradle gates report clear skips.
-- Local Gradle checks require an explicit `ANDROID_HOME`; the repository does
-  not assume a maintainer-specific SDK location.
+  runs and Gradle gates report clear skips. The workflow uses Ubuntu 24.04 and
+  cancels superseded runs.
+- Local Gradle checks accept an explicit `ANDROID_HOME` or `ANDROID_SDK_ROOT`;
+  the repository does not assume a maintainer-specific SDK location.
 - The baseline check protects media cleanup, play/record dispatch, and
   first-render button icon state.
 - Recorder startup guards optional action-bar and record/play control lookups
@@ -72,6 +73,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   instead of switching to active recording or playback controls.
 - Recorder lifecycle cleanup resets field-backed recording and playback control
   state so released media resources do not leave stale stop controls on screen.
+- Recorder lifecycle cleanup routes active capture and playback through guarded
+  stop methods before release, allowing recording containers to finalize.
 - Playback completion resets the play control to idle and releases the player
   without requiring an extra stop tap.
 - Recorder playback errors release the player and reset controls to idle rather

@@ -2,6 +2,10 @@
 
 ## 2026-06-10
 
+- Routed pause-time media cleanup through guarded recorder/player stop methods
+  so active recording containers can finalize before release.
+- Made root checks location-independent, accepted `ANDROID_SDK_ROOT`, and
+  pinned CI to Ubuntu 24.04 with superseded-run cancellation.
 - Added a lightweight GitHub Actions workflow that runs `make check` for the
   recorder source baseline with immutable checkout, read-only permissions, and
   a bounded timeout.

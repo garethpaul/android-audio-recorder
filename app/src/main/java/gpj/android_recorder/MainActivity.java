@@ -239,11 +239,11 @@ public class MainActivity extends Activity {
     public void onPause() {
         super.onPause();
         if (mRecorder != null) {
-            releaseRecorder();
+            stopRecording();
         }
 
         if (mPlayer != null) {
-            releasePlayer();
+            stopPlaying();
         }
 
         resetRecordingControls();

@@ -231,6 +231,20 @@ if ! grep -Fq "private void releasePlayer()" "$MAIN_ACTIVITY"; then
   exit 1
 fi
 
+ON_PAUSE=$(awk '/public void onPause\(\)/,/^    }/' "$MAIN_ACTIVITY")
+if ! printf '%s\n' "$ON_PAUSE" | grep -Fq "stopRecording();"; then
+  printf '%s\n' "Recorder lifecycle cleanup must stop active recording before release." >&2
+  exit 1
+fi
+if ! printf '%s\n' "$ON_PAUSE" | grep -Fq "stopPlaying();"; then
+  printf '%s\n' "Recorder lifecycle cleanup must stop active playback before release." >&2
+  exit 1
+fi
+if printf '%s\n' "$ON_PAUSE" | grep -Eq "release(Recorder|Player)\(\);"; then
+  printf '%s\n' "Recorder lifecycle cleanup must not bypass guarded stop methods." >&2
+  exit 1
+fi
+
 if ! grep -Fq "catch (RuntimeException e)" "$MAIN_ACTIVITY"; then
   printf '%s\n' "Recorder/player stop and start failures must be guarded." >&2
   exit 1
@@ -249,6 +263,8 @@ fi
 for workflow_contract in \
   "permissions:" \
   "contents: read" \
+  "runs-on: ubuntu-24.04" \
+  "cancel-in-progress: true" \
   "timeout-minutes: 5" \
   "workflow_dispatch:" \
   "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10" \
@@ -257,6 +273,15 @@ for workflow_contract in \
   "make check"; do
   if ! grep -Fq "$workflow_contract" "$CI_WORKFLOW"; then
     printf '%s\n' "GitHub Actions check workflow must keep contract: $workflow_contract" >&2
+    exit 1
+  fi
+done
+
+for make_contract in \
+  'ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))' \
+  'ANDROID_SDK := $(if $(ANDROID_HOME),$(ANDROID_HOME),$(ANDROID_SDK_ROOT))'; do
+  if ! grep -Fq "$make_contract" "$ROOT_DIR/Makefile"; then
+    printf '%s\n' "Makefile must keep contract: $make_contract" >&2
     exit 1
   fi
 done
