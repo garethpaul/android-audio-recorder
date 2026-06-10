@@ -20,3 +20,6 @@ jobs:
 
       - name: Run baseline
         run: make check
+        env:
+          ANDROID_HOME: ""
+          ANDROID_SDK_ROOT: ""

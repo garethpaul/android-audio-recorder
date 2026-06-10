@@ -252,6 +252,8 @@ for workflow_contract in \
   "timeout-minutes: 5" \
   "workflow_dispatch:" \
   "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10" \
+  'ANDROID_HOME: ""' \
+  'ANDROID_SDK_ROOT: ""' \
   "make check"; do
   if ! grep -Fq "$workflow_contract" "$CI_WORKFLOW"; then
     printf '%s\n' "GitHub Actions check workflow must keep contract: $workflow_contract" >&2

@@ -23,6 +23,8 @@ checked before review.
   reads, and bounded the job to five minutes.
 - Reused the existing guarded Makefile targets, which run SDK-free checks and
   skip Gradle work when the Android SDK is absent.
+- Clear ambient Android SDK variables in the hosted baseline so GitHub's runner
+  image cannot accidentally invoke the unsupported Gradle 2.2.1 toolchain.
 - Removed the maintainer-specific default SDK path; Gradle checks now require
   an explicit `ANDROID_HOME`.
 - Extended `scripts/check-baseline.sh` to require the CI workflow and this
