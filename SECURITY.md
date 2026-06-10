@@ -35,6 +35,8 @@ Helpful reports include:
   surface.
 - Recorder lifecycle cleanup should return released recording/playback controls
   to idle state so users are not left with stale active-media UI.
+- Pause-interrupted microphone captures are deleted after recorder cleanup so
+  backgrounding the app does not silently retain sensitive audio.
 
 ## Mobile Privacy Notes
 

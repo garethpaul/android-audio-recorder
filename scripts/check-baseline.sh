@@ -221,6 +221,12 @@ if ! grep -Fq "return stopRecording();" "$MAIN_ACTIVITY"; then
   exit 1
 fi
 
+if ! grep -Fq "discardInterruptedRecording();" "$MAIN_ACTIVITY" || \
+   ! grep -Fq "recording.delete()" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Pause-interrupted recordings must be discarded after cleanup." >&2
+  exit 1
+fi
+
 for stop_contract in \
   "private boolean stopRecording()" \
   "boolean stopped = false;" \
@@ -249,8 +255,8 @@ if ! grep -Fq "private void releasePlayer()" "$MAIN_ACTIVITY"; then
 fi
 
 ON_PAUSE=$(awk '/public void onPause\(\)/,/^    }/' "$MAIN_ACTIVITY")
-if ! printf '%s\n' "$ON_PAUSE" | grep -Fq "stopRecording();"; then
-  printf '%s\n' "Recorder lifecycle cleanup must stop active recording before release." >&2
+if ! printf '%s\n' "$ON_PAUSE" | grep -Fq "discardInterruptedRecording();"; then
+  printf '%s\n' "Recorder lifecycle cleanup must discard interrupted recording after release." >&2
   exit 1
 fi
 if ! printf '%s\n' "$ON_PAUSE" | grep -Fq "stopPlaying();"; then

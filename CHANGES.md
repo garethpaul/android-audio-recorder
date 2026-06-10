@@ -2,6 +2,10 @@
 
 ## 2026-06-10
 
+- Deleted pause-interrupted captures after safe recorder finalization instead
+  of silently retaining audio that the resumed UI cannot expose.
+- Disabled persisted checkout credentials and replaced the generic generated
+  preview with artwork matching the app's single-control recorder layout.
 - Routed pause-time media cleanup through guarded recorder/player stop methods
   so active recording containers can finalize before release.
 - Propagated recorder stop failures to the control state so incomplete captures

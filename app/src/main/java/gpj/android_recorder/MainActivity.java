@@ -163,6 +163,16 @@ public class MainActivity extends Activity {
         mRecorder = null;
     }
 
+    private void discardInterruptedRecording() {
+        stopRecording();
+        if (mFileName != null) {
+            File recording = new File(mFileName);
+            if (recording.exists() && !recording.delete()) {
+                Log.e(LOG_TAG, "interrupted recording cleanup failed");
+            }
+        }
+    }
+
     private File recordingDirectory() {
         File directory = getExternalFilesDir(null);
         if (directory == null) {
@@ -245,7 +255,7 @@ public class MainActivity extends Activity {
     public void onPause() {
         super.onPause();
         if (mRecorder != null) {
-            stopRecording();
+            discardInterruptedRecording();
         }
 
         if (mPlayer != null) {
