@@ -71,6 +71,9 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   before wiring button listeners.
 - Recorder controls remain in their idle state after record/play startup failures
   instead of switching to active recording or playback controls.
+- Recorder configuration failures during media construction, microphone
+  source, format, output path, or encoder setup release partial resources and
+  leave controls idle.
 - Recorder lifecycle cleanup resets field-backed recording and playback control
   state so released media resources do not leave stale stop controls on screen.
 - Recorder lifecycle cleanup routes active capture and playback through guarded
@@ -129,6 +132,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   Actions baseline.
 - See `docs/plans/2026-06-12-interrupted-recording-cleanup.md` for the
   pause-interrupted microphone capture deletion contract.
+- See `docs/plans/2026-06-12-recorder-configuration-failures.md` for complete
+  recorder startup guarding and partial-resource cleanup.
 
 ## Contributing
 

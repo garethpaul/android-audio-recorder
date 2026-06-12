@@ -307,6 +307,36 @@ if ! grep -Fq "private boolean startRecording()" "$MAIN_ACTIVITY"; then
   exit 1
 fi
 
+if ! awk '
+  /private boolean startRecording\(\)/ { in_method = 1 }
+  in_method && /releaseRecorder\(\);/ && !initial_release { initial_release = NR }
+  in_method && /try \{/ { try_line = NR }
+  in_method && /mRecorder = new MediaRecorder\(\);/ { construct = NR }
+  in_method && /mRecorder\.setAudioSource/ { source = NR }
+  in_method && /mRecorder\.setOutputFormat/ { format = NR }
+  in_method && /mRecorder\.setOutputFile/ { output = NR }
+  in_method && /mRecorder\.setAudioEncoder/ { encoder = NR }
+  in_method && /mRecorder\.prepare\(\);/ { prepare = NR }
+  in_method && /mRecorder\.start\(\);/ { start = NR }
+  in_method && /return true;/ { success = NR }
+  in_method && /catch \(IOException e\)/ { io_catch = NR }
+  in_method && io_catch && !runtime_catch && /releaseRecorder\(\);/ { io_release = NR }
+  in_method && /catch \(RuntimeException e\)/ { runtime_catch = NR }
+  in_method && runtime_catch && /releaseRecorder\(\);/ { runtime_release = NR }
+  in_method && /return false;/ {
+    failure = NR
+    exit !(initial_release < try_line && try_line < construct && construct < source &&
+      source < format && format < output && output < encoder && encoder < prepare &&
+      prepare < start && start < success && success < io_catch &&
+      io_catch < io_release && io_release < runtime_catch &&
+      runtime_catch < runtime_release && runtime_release < failure)
+  }
+  END { if (!failure) exit 1 }
+' "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Recorder construction and configuration must stay inside guarded startup cleanup." >&2
+  exit 1
+fi
+
 if ! grep -Fq "private boolean startPlaying()" "$MAIN_ACTIVITY"; then
   printf '%s\n' "startPlaying must return a success flag." >&2
   exit 1
@@ -650,6 +680,11 @@ if ! grep -Fq "Pause-interrupted recordings are deleted" "$README"; then
   exit 1
 fi
 
+if ! grep -Fq "Recorder configuration failures" "$README"; then
+  printf '%s\n' "README must document recorder configuration failure handling." >&2
+  exit 1
+fi
+
 if ! grep -Fq "make check" "$ROOT_DIR/docs/plans/2026-06-09-recorder-startup-ui-state.md"; then
   printf '%s\n' "Recorder startup UI state plan must document make check verification." >&2
   exit 1
@@ -673,6 +708,12 @@ fi
 if ! grep -Fq "Status: Completed" "$ROOT_DIR/docs/plans/2026-06-10-recorder-stop-result.md" || \
    ! grep -Fq "make check" "$ROOT_DIR/docs/plans/2026-06-10-recorder-stop-result.md"; then
   printf '%s\n' "Recorder stop-result plan must record completed status and make check verification." >&2
+  exit 1
+fi
+
+if ! grep -Fq "Status: Completed" "$ROOT_DIR/docs/plans/2026-06-12-recorder-configuration-failures.md" || \
+   ! grep -Fq "make check" "$ROOT_DIR/docs/plans/2026-06-12-recorder-configuration-failures.md"; then
+  printf '%s\n' "Recorder configuration-failure plan must record completed status and make check verification." >&2
   exit 1
 fi
 

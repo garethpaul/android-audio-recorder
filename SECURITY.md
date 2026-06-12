@@ -48,6 +48,8 @@ Helpful reports include:
 - Pause-interrupted microphone captures should be finalized and deleted before
   the lifecycle reset so backgrounding cannot retain audio that the visible UI
   no longer exposes.
+- Recorder construction and configuration failures should release partial media
+  resources without logging recording paths or device-specific details.
 
 ## Mobile Privacy Notes
 
