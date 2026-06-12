@@ -91,4 +91,13 @@ complete on the pushed head.
 - Focused hostile mutations rejected properties, wrapper JAR, and incomplete
   plan evidence.
 - `sh -n scripts/check-baseline.sh` and `git diff --check` passed.
-- Hosted exact-head evidence remains pending and will be appended after push.
+
+## Hosted Verification
+
+- On implementation head `63eca0b1c8f5a921c9810324a9474269e5f83268`,
+  pull-request `Check` run `27439366513` passed the full Java 8/API 22 gate.
+- CodeQL run `27439364674` passed both the actions and java-kotlin analyzers on
+  the same implementation head.
+- PR #3 was open, clean, and mergeable at that head. The final evidence-only
+  commit must rerun the same pull-request and CodeQL gates before tracker
+  reconciliation.
