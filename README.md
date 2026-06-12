@@ -59,10 +59,9 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - `make check` - runs the source baseline and Android SDK-backed Gradle checks
   when `ANDROID_HOME` or `ANDROID_SDK_ROOT` is configured
 - `scripts/check-baseline.sh` - runs SDK-free recorder baseline checks
-- GitHub Actions runs `make check` on pushes and pull requests. On hosted
-  Linux runners without the legacy Android SDK, the SDK-free baseline still
-  runs and Gradle gates report clear skips. The workflow uses Ubuntu 24.04 and
-  cancels superseded runs.
+- The canonical GitHub Actions workflow installs Android API 22 and build-tools
+  24.0.3, selects Java 8, and runs full `make check` on pushes and pull
+  requests. The workflow uses Ubuntu 24.04 and cancels superseded runs.
 - Local Gradle checks accept an explicit `ANDROID_HOME` or `ANDROID_SDK_ROOT`;
   the repository does not assume a maintainer-specific SDK location.
 - The baseline check protects media cleanup, play/record dispatch, and
@@ -88,7 +87,9 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   than leaving the stop icon visible for a failed playback session.
 - `./gradlew lint --no-daemon`, `./gradlew test --no-daemon`, and `./gradlew assembleDebug --no-daemon` when the Android SDK is configured
 
-When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
+The legacy target SDK produces one documented `OldTargetApi` compatibility
+warning. When the required SDK is unavailable locally, use static checks and
+source review first, then rely on the hosted matching platform toolchain.
 
 ## Configuration and Secrets
 
@@ -112,6 +113,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - See `VISION.md` for project direction and contribution guardrails.
 - See `docs/plans/2026-06-08-recorder-check-wrapper.md` for the root
   verification wrapper baseline.
+- See `docs/plans/2026-06-12-hosted-android-verification.md` for the complete
+  hosted Android lint, test, and build gate.
 - See `docs/plans/2026-06-09-recorder-button-icon-contracts.md` for the
   first-render button icon contract.
 - See `docs/plans/2026-06-09-recorder-startup-control-guards.md` for action-bar

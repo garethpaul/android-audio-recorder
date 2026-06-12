@@ -12,19 +12,17 @@ checked before review.
 ## Objectives
 
 - Run the existing `make check` wrapper in GitHub Actions.
-- Keep the CI job useful even when a legacy Android SDK is unavailable.
+- Run the complete legacy Android gate with a matching hosted SDK.
 - Make the workflow presence part of the SDK-free baseline contract.
 
 ## Work Completed
 
 - Added `.github/workflows/check.yml` to run `make check` on pushes, pull
   requests, and manual dispatches.
-- Pinned checkout to an immutable revision, limited permissions to repository
-  reads, and bounded the job to five minutes.
-- Reused the existing guarded Makefile targets, which run SDK-free checks and
-  skip Gradle work when the Android SDK is absent.
-- Clear ambient Android SDK variables in the hosted baseline so GitHub's runner
-  image cannot accidentally invoke the unsupported Gradle 2.2.1 toolchain.
+- Pinned setup actions to immutable revisions, limited permissions to
+  repository reads, and bounded the job to 15 minutes.
+- Install Android API 22 and build-tools 24.0.3, select Java 8, and run the
+  complete `make check` gate including lint, unit tests, and debug assembly.
 - Removed the maintainer-specific default SDK path; Gradle checks now require
   an explicit `ANDROID_HOME`.
 - Extended `scripts/check-baseline.sh` to require the CI workflow and this
@@ -45,5 +43,5 @@ checked before review.
 
 ## Follow-Up Candidates
 
-- Add Android SDK-backed CI after migrating Gradle 2.2.1, Android Gradle Plugin
-  1.2.3, JCenter, and the API 22 build baseline.
+- Modernize Gradle 2.2.1, Android Gradle Plugin 1.2.3, JCenter, and the API 22
+  target in a separate compatibility-focused change.
