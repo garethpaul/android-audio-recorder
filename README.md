@@ -35,7 +35,7 @@ Additional scan context:
 
 - Git
 - Android Studio or a compatible Android SDK
-- Gradle or the checked-in Gradle wrapper when present
+- Java 8 and the checked-in Gradle wrapper
 
 ### Setup
 
@@ -49,6 +49,11 @@ scripts/check-baseline.sh
 ```
 
 The setup commands above are derived from repository files. Legacy mobile, Python, or JavaScript samples may require older SDKs or package versions than a modern workstation uses by default.
+
+The generated wrapper still executes Gradle 2.2.1 for compatibility. It uses
+`distributionSha256Sum` to authenticate the downloaded distribution, while the
+SDK-free baseline verifies the wrapper JAR and launchers. This does not make the first build offline-reproducible;
+an uncached build still needs Gradle's HTTPS distribution service.
 
 ## Running or Using the Project
 
@@ -86,6 +91,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - Recorder playback errors release the player and reset controls to idle rather
   than leaving the stop icon visible for a failed playback session.
 - `./gradlew lint --no-daemon`, `./gradlew test --no-daemon`, and `./gradlew assembleDebug --no-daemon` when the Android SDK is configured
+- [`docs/plans/2026-06-12-gradle-wrapper-verification.md`](docs/plans/2026-06-12-gradle-wrapper-verification.md)
+  records wrapper provenance and compatibility evidence.
 
 The legacy target SDK produces one documented `OldTargetApi` compatibility
 warning. When the required SDK is unavailable locally, use static checks and

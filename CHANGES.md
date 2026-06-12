@@ -2,6 +2,11 @@
 
 ## 2026-06-12
 
+- Regenerated the wrapper bootstrap with official Gradle 8.14.5 tooling while
+  retaining the Gradle 2.2.1 Android runtime, and pinned the official
+  distribution checksum.
+- Extended the SDK-free exact wrapper contract and documented its online
+  dependency boundary.
 - Deleted pause-interrupted recordings after guarded recorder finalization so
   backgrounding cannot retain microphone audio hidden by the reset UI.
 - Guarded recorder construction and all media configuration calls alongside

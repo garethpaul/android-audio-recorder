@@ -34,13 +34,15 @@ Priority:
 - Keep recordings in app-specific storage unless a documented user-facing export
   flow is added
 - Keep the SDK-free `make check` baseline running in GitHub Actions
+- Keep the legacy Gradle runtime behind a checksum-verified generated wrapper
 
 Next priorities:
 
 - Add runtime permission handling for microphone and storage access
 - Move storage behavior to modern scoped-storage-compatible APIs
 - Add Android tests around recording, playback dispatch, and lifecycle handling
-- Modernize Gradle, SDK levels, and dependencies in a dedicated pass
+- Evaluate Gradle runtime, SDK, plugin, and dependency modernization together
+  in a dedicated compatibility pass; wrapper bootstrap hardening is separate
 
 Contribution rules:
 
