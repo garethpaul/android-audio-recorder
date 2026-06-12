@@ -35,6 +35,8 @@ Helpful reports include:
   surface.
 - Recorder lifecycle cleanup should return released recording/playback controls
   to idle state so users are not left with stale active-media UI.
+- Recorder construction and configuration failures should release partial media
+  resources without logging recording paths or device-specific details.
 
 ## Mobile Privacy Notes
 

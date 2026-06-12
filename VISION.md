@@ -23,6 +23,7 @@ Priority:
 - Keep recorder controls visually aligned with the action they trigger
 - Keep recorder startup safe when optional UI chrome or controls are missing
 - Keep recorder controls from entering active states when media startup fails
+- Keep recorder construction and configuration failures inside guarded cleanup
 - Reset playback controls automatically when media playback completes
 - Reset playback controls automatically when media playback errors
 - Reset recorder controls when lifecycle cleanup releases recording resources

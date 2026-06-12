@@ -1,5 +1,13 @@
 # Changes
 
+## 2026-06-12
+
+- Guarded recorder construction and all media configuration calls alongside
+  prepare/start so permission, device-state, storage, and encoder failures
+  release partial resources instead of escaping the click handler.
+- Added SDK-free startup ordering contracts and a completed implementation
+  plan.
+
 ## 2026-06-10
 
 - Routed pause-time media cleanup through guarded recorder/player stop methods
