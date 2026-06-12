@@ -740,11 +740,12 @@ if ! grep -Fq "Status: Completed" "$CI_PLAN" || \
 fi
 
 if [ ! -f "$HOSTED_ANDROID_PLAN" ] || \
-   ! grep -Fq "Status: Implementation Complete; Hosted Verification Pending" "$HOSTED_ANDROID_PLAN" || \
+   ! grep -Fq "Status: Completed" "$HOSTED_ANDROID_PLAN" || \
    ! grep -Fq "make check" "$HOSTED_ANDROID_PLAN" || \
    ! grep -Fq "OldTargetApi" "$HOSTED_ANDROID_PLAN" || \
-   ! grep -Fq "Exact-head pull-request workflow pending" "$HOSTED_ANDROID_PLAN"; then
-  printf '%s\n' "Hosted recorder verification plan must record completed local evidence and pending hosted evidence." >&2
+   ! grep -Fq 'GitHub Actions `pull_request` run `27401263032` passed' "$HOSTED_ANDROID_PLAN" || \
+   ! grep -Fq "97509a11946ed1a846ebf0ab431c9ca8aa9b8d17" "$HOSTED_ANDROID_PLAN"; then
+  printf '%s\n' "Hosted recorder verification plan must record completed local and hosted evidence." >&2
   exit 1
 fi
 
