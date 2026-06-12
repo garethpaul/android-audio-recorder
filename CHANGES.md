@@ -16,6 +16,8 @@
 - Removed the maintainer-specific Android SDK path from the Makefile.
 - Cleared hosted Android SDK variables so the SDK-free CI job cannot
   accidentally enter the legacy Gradle path.
+- Disabled persisted checkout credentials and replaced substring workflow
+  checks with one canonical, single-workflow security contract.
 
 ## 2026-06-09
 

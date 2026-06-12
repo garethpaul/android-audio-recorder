@@ -37,6 +37,42 @@ require_button_attribute() {
   fi
 }
 
+expected_ci_workflow() {
+  cat <<'EOF'
+name: Check
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Run baseline
+        run: make check
+        env:
+          ANDROID_HOME: ""
+          ANDROID_SDK_ROOT: ""
+EOF
+}
+
 if grep -Fq "onPlay(mStartPlaying[0]);" "$MAIN_ACTIVITY"; then
   printf '%s\n' "Play button must not dispatch onPlay before branch-specific UI updates." >&2
   exit 1
@@ -277,22 +313,25 @@ if [ ! -f "$CI_WORKFLOW" ]; then
   exit 1
 fi
 
-for workflow_contract in \
-  "permissions:" \
-  "contents: read" \
-  "runs-on: ubuntu-24.04" \
-  "cancel-in-progress: true" \
-  "timeout-minutes: 5" \
-  "workflow_dispatch:" \
-  "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10" \
-  'ANDROID_HOME: ""' \
-  'ANDROID_SDK_ROOT: ""' \
-  "make check"; do
-  if ! grep -Fq "$workflow_contract" "$CI_WORKFLOW"; then
-    printf '%s\n' "GitHub Actions check workflow must keep contract: $workflow_contract" >&2
-    exit 1
+workflow_count=0
+workflow_name=""
+for workflow_path in "$ROOT_DIR"/.github/workflows/*.yml "$ROOT_DIR"/.github/workflows/*.yaml; do
+  if [ ! -f "$workflow_path" ]; then
+    continue
   fi
+  workflow_count=$((workflow_count + 1))
+  workflow_name=$(basename "$workflow_path")
 done
+
+if [ "$workflow_count" -ne 1 ] || [ "$workflow_name" != "check.yml" ]; then
+  printf '%s\n' "check.yml must remain the only approved GitHub Actions workflow." >&2
+  exit 1
+fi
+
+if [ "$(cat "$CI_WORKFLOW")" != "$(expected_ci_workflow)" ]; then
+  printf '%s\n' "GitHub Actions check workflow must match the approved SDK-free security baseline." >&2
+  exit 1
+fi
 
 for make_contract in \
   'ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))' \

@@ -29,6 +29,8 @@ checked before review.
   an explicit `ANDROID_HOME`.
 - Extended `scripts/check-baseline.sh` to require the CI workflow and this
   completed plan.
+- Disabled persisted checkout credentials and enforce one canonical workflow
+  document so misplaced YAML and unreviewed additional workflows fail locally.
 - Updated README, VISION, SECURITY, and CHANGES with the CI baseline.
 
 ## Verification

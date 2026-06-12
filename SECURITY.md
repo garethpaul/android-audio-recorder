@@ -33,6 +33,8 @@ Helpful reports include:
 - Pinned, read-only GitHub Actions runs the guarded `make check` baseline;
   review workflow, Gradle, and checker changes as part of the supply-chain
   surface.
+- Hosted checkout credentials are not persisted, and `check.yml` remains the
+  sole approved workflow until another workflow receives an explicit contract.
 - Recorder lifecycle cleanup should return released recording/playback controls
   to idle state so users are not left with stale active-media UI.
 
