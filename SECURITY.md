@@ -35,10 +35,22 @@ Helpful reports include:
   surface.
 - Hosted checkout credentials are not persisted, and `check.yml` remains the
   sole approved workflow until another workflow receives an explicit contract.
+- CODEOWNERS covers CI, verification entry points, Gradle configuration, and
+  the complete app tree. Repository rules should require owner approval for
+  those paths and the `Check / check` status.
+- The SDK-free baseline locks the fixed Gradle configuration, rejects alternate
+  manifests, symlinks, packaged binary payloads, and direct network clients,
+  compares the workflow contract byte-for-byte, and verifies wrapper hashes.
+- The Android manifest is byte-exact and allows only the microphone permission.
+  Repository-wide ownership prevents redirected source from escaping review.
 - Recorder lifecycle cleanup should return released recording/playback controls
   to idle state so users are not left with stale active-media UI.
 
 ## Mobile Privacy Notes
+
+The SDK-free baseline does not inspect a built merged manifest. Android
+SDK-backed lint, tests, assembly, and merged-manifest review remain required
+before claiming platform-level permission verification.
 
 If this project requests device permissions such as location, camera, microphone, contacts, Bluetooth, health data, or local storage access, reports should describe the permission involved and whether sensitive data can be accessed, persisted, or transmitted unexpectedly. Please avoid testing against real third-party user data or accounts you do not control.
 

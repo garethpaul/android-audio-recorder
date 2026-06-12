@@ -3,11 +3,20 @@ set -eu
 
 ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 MAIN_ACTIVITY="$ROOT_DIR/app/src/main/java/gpj/android_recorder/MainActivity.java"
+APP_BUILD="$ROOT_DIR/app/build.gradle"
+ROOT_BUILD="$ROOT_DIR/build.gradle"
+SETTINGS_GRADLE="$ROOT_DIR/settings.gradle"
+GRADLE_PROPERTIES="$ROOT_DIR/gradle.properties"
+WRAPPER_PROPERTIES="$ROOT_DIR/gradle/wrapper/gradle-wrapper.properties"
+MANIFEST="$ROOT_DIR/app/src/main/AndroidManifest.xml"
 LAYOUT="$ROOT_DIR/app/src/main/res/layout/activity_main.xml"
 README="$ROOT_DIR/README.md"
 RES_DIR="$ROOT_DIR/app/src/main/res"
 CI_PLAN="$ROOT_DIR/docs/plans/2026-06-10-ci-baseline.md"
 CI_WORKFLOW="$ROOT_DIR/.github/workflows/check.yml"
+CODEOWNERS="$ROOT_DIR/.github/CODEOWNERS"
+EXPECTED_FILE=$(mktemp "${TMPDIR:-/tmp}/android-audio-recorder-expected.XXXXXX")
+trap 'rm -f "$EXPECTED_FILE"' EXIT HUP INT TERM
 
 require_button_attribute() {
   button_id=$1
@@ -73,28 +82,187 @@ jobs:
 EOF
 }
 
+if find "$ROOT_DIR/.github" "$ROOT_DIR/scripts" "$ROOT_DIR/app" "$ROOT_DIR/gradle" \
+  "$ROOT_DIR/Makefile" "$ROOT_DIR/build.gradle" "$ROOT_DIR/settings.gradle" \
+  "$ROOT_DIR/gradle.properties" "$ROOT_DIR/gradlew" "$ROOT_DIR/gradlew.bat" \
+  -type l -print | grep -q .; then
+  printf '%s\n' "Protected build, CI, and app paths must not contain symbolic links." >&2
+  exit 1
+fi
+
 if grep -Fq "onPlay(mStartPlaying[0]);" "$MAIN_ACTIVITY"; then
   printf '%s\n' "Play button must not dispatch onPlay before branch-specific UI updates." >&2
   exit 1
 fi
 
-if ! grep -Fq 'android:allowBackup="false"' "$ROOT_DIR/app/src/main/AndroidManifest.xml"; then
-  printf '%s\n' "Recorder must disable Android backups for local audio state." >&2
+cat > "$EXPECTED_FILE" <<'EOF'
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="gpj.android_recorder" >
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <application
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
+EOF
+if ! cmp -s "$MANIFEST" "$EXPECTED_FILE"; then
+  printf '%s\n' "Android manifest must match the audited microphone-only privacy baseline." >&2
   exit 1
 fi
 
-if grep -Fq 'android:allowBackup="true"' "$ROOT_DIR/app/src/main/AndroidManifest.xml"; then
-  printf '%s\n' "Recorder must not allow Android backups." >&2
+manifest_paths=$(find "$ROOT_DIR/app/src" -type f -name 'AndroidManifest.xml' -print | LC_ALL=C sort)
+if [ "$manifest_paths" != "$MANIFEST" ]; then
+  printf '%s\n' "The fixed legacy app must keep one audited Android manifest." >&2
   exit 1
 fi
 
-if grep -Fq 'android.permission.WRITE_EXTERNAL_STORAGE' "$ROOT_DIR/app/src/main/AndroidManifest.xml"; then
-  printf '%s\n' "Recorder must not request broad external storage writes." >&2
+if find "$ROOT_DIR/app/src" -type f \( -name '*.java' -o -name '*.kt' \) \
+  -exec grep -E 'java\.net|android\.net|HttpURLConnection|URLConnection|Socket|WebView|org\.apache\.http|okhttp|retrofit' {} + | grep -q .; then
+  printf '%s\n' "Recorder source sets must not add direct network clients." >&2
   exit 1
 fi
 
-if ! grep -Fq 'android.permission.RECORD_AUDIO' "$ROOT_DIR/app/src/main/AndroidManifest.xml"; then
-  printf '%s\n' "Recorder must keep the microphone permission explicit." >&2
+if find "$ROOT_DIR/app" -type f \( -name '*.so' -o -name '*.dex' -o -name '*.jar' -o -name '*.aar' -o -name '*.apk' \) \
+  ! -path "$ROOT_DIR/app/build/*" -print | grep -q .; then
+  printf '%s\n' "Packaged Android binary payloads are outside the auditable source baseline." >&2
+  exit 1
+fi
+
+expected_gradle_paths=$(printf '%s\n' \
+  "$APP_BUILD" \
+  "$ROOT_BUILD" \
+  "$GRADLE_PROPERTIES" \
+  "$WRAPPER_PROPERTIES" \
+  "$SETTINGS_GRADLE" | LC_ALL=C sort)
+actual_gradle_paths=$(find "$ROOT_DIR" \
+  -path "$ROOT_DIR/.git" -prune -o \
+  -path "$ROOT_DIR/app/build" -prune -o \
+  -type f \( -name '*.gradle' -o -name 'gradle.properties' -o -name 'gradle-wrapper.properties' \) \
+  -print | LC_ALL=C sort)
+if [ "$actual_gradle_paths" != "$expected_gradle_paths" ]; then
+  printf '%s\n' "The fixed legacy build must not add executable Gradle configuration." >&2
+  exit 1
+fi
+
+cat > "$EXPECTED_FILE" <<'EOF'
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion "24.0.3"
+
+    defaultConfig {
+        applicationId "gpj.android_recorder"
+        minSdkVersion 21
+        targetSdkVersion 22
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+}
+EOF
+if ! cmp -s "$APP_BUILD" "$EXPECTED_FILE"; then
+  printf '%s\n' "App Gradle configuration must match the audited legacy baseline." >&2
+  exit 1
+fi
+
+cat > "$EXPECTED_FILE" <<'EOF'
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.2.3'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
+EOF
+if ! cmp -s "$ROOT_BUILD" "$EXPECTED_FILE"; then
+  printf '%s\n' "Root Gradle configuration must match the audited legacy baseline." >&2
+  exit 1
+fi
+
+printf "%s\n" "include ':app'" > "$EXPECTED_FILE"
+if ! cmp -s "$SETTINGS_GRADLE" "$EXPECTED_FILE"; then
+  printf '%s\n' "Gradle settings must keep the single audited app module." >&2
+  exit 1
+fi
+
+cat > "$EXPECTED_FILE" <<'EOF'
+# Project-wide Gradle settings.
+
+# IDE (e.g. Android Studio) users:
+# Gradle settings configured through the IDE *will override*
+# any settings specified in this file.
+
+# For more details on how to configure your build environment visit
+# http://www.gradle.org/docs/current/userguide/build_environment.html
+
+# Specifies the JVM arguments used for the daemon process.
+# The setting is particularly useful for tweaking memory settings.
+# Default value: -Xmx10248m -XX:MaxPermSize=256m
+# org.gradle.jvmargs=-Xmx2048m -XX:MaxPermSize=512m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8
+
+# When configured, Gradle will run in incubating parallel mode.
+# This option should only be used with decoupled projects. More details, visit
+# http://www.gradle.org/docs/current/userguide/multi_project_builds.html#sec:decoupled_projects
+# org.gradle.parallel=true
+EOF
+if ! cmp -s "$GRADLE_PROPERTIES" "$EXPECTED_FILE"; then
+  printf '%s\n' "Gradle properties must match the audited legacy baseline." >&2
+  exit 1
+fi
+
+cat > "$EXPECTED_FILE" <<'EOF'
+#Wed Apr 10 15:27:10 PDT 2013
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-2.2.1-all.zip
+EOF
+if ! cmp -s "$WRAPPER_PROPERTIES" "$EXPECTED_FILE"; then
+  printf '%s\n' "Gradle wrapper properties must match the audited legacy baseline." >&2
+  exit 1
+fi
+
+if [ "$(sha256sum "$ROOT_DIR/gradlew" | awk '{print $1}')" != "874d75d37bf38c810a8314e0b2f78a3c77fce9437963ae33cec8543d92662b61" ] || \
+   [ "$(sha256sum "$ROOT_DIR/gradlew.bat" | awk '{print $1}')" != "c13c6e91b9a517783976de213d46398c661ea9e17651376d7301e839eaedcc62" ] || \
+   [ "$(sha256sum "$ROOT_DIR/gradle/wrapper/gradle-wrapper.jar" | awk '{print $1}')" != "e2b82129ab64751fd40437007bd2f7f2afb3c6e41a9198e628650b22d5824a14" ]; then
+  printf '%s\n' "Gradle wrapper executables must match the recorded trusted hashes." >&2
   exit 1
 fi
 
@@ -313,23 +481,34 @@ if [ ! -f "$CI_WORKFLOW" ]; then
   exit 1
 fi
 
-workflow_count=0
-workflow_name=""
-for workflow_path in "$ROOT_DIR"/.github/workflows/*.yml "$ROOT_DIR"/.github/workflows/*.yaml; do
-  if [ ! -f "$workflow_path" ]; then
-    continue
-  fi
-  workflow_count=$((workflow_count + 1))
-  workflow_name=$(basename "$workflow_path")
-done
-
-if [ "$workflow_count" -ne 1 ] || [ "$workflow_name" != "check.yml" ]; then
+workflow_paths=$(find "$ROOT_DIR/.github/workflows" -type f \( -name '*.yml' -o -name '*.yaml' \) -print | LC_ALL=C sort)
+if [ "$workflow_paths" != "$CI_WORKFLOW" ]; then
   printf '%s\n' "check.yml must remain the only approved GitHub Actions workflow." >&2
   exit 1
 fi
 
-if [ "$(cat "$CI_WORKFLOW")" != "$(expected_ci_workflow)" ]; then
+expected_ci_workflow > "$EXPECTED_FILE"
+if ! cmp -s "$CI_WORKFLOW" "$EXPECTED_FILE"; then
   printf '%s\n' "GitHub Actions check workflow must match the approved SDK-free security baseline." >&2
+  exit 1
+fi
+
+cat > "$EXPECTED_FILE" <<'EOF'
+* @garethpaul
+/.github/CODEOWNERS @garethpaul
+/.github/workflows/ @garethpaul
+/Makefile @garethpaul
+/scripts/check-baseline.sh @garethpaul
+/build.gradle @garethpaul
+/settings.gradle @garethpaul
+/gradle.properties @garethpaul
+/gradle/ @garethpaul
+/gradlew @garethpaul
+/gradlew.bat @garethpaul
+/app/ @garethpaul
+EOF
+if [ ! -f "$CODEOWNERS" ] || ! cmp -s "$CODEOWNERS" "$EXPECTED_FILE"; then
+  printf '%s\n' "CODEOWNERS must protect CI, Gradle, and recorder privacy boundaries." >&2
   exit 1
 fi
 

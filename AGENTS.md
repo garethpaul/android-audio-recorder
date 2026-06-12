@@ -32,7 +32,7 @@
 
 ## Testing guidance
 
-- Test-related files detected: `docs/plans/2026-06-09-recorder-app-specific-storage.md`
+- A legacy instrumentation smoke test exists, but there is no substantive behavioral test suite; treat `make check` as the minimum baseline.
 - Start with the narrowest relevant test or Make target, then run `make check` before handing off if the change is not documentation-only.
 - Keep README verification notes in sync when commands, fixtures, or supported toolchains change.
 

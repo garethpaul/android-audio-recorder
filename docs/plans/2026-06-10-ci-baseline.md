@@ -29,8 +29,12 @@ checked before review.
   an explicit `ANDROID_HOME`.
 - Extended `scripts/check-baseline.sh` to require the CI workflow and this
   completed plan.
-- Disabled persisted checkout credentials and enforce one canonical workflow
-  document so misplaced YAML and unreviewed additional workflows fail locally.
+- Disabled persisted checkout credentials and enforce one byte-exact canonical
+  workflow; additional workflow files under `.github/workflows` fail locally.
+- Added owner coverage for CI, Gradle, and the complete app tree, and locked the
+  fixed legacy Gradle/module configuration against source-set redirection.
+- Enforced the exact microphone-only manifest, rejected symlinks and packaged
+  binaries, and recorded hashes for every Gradle wrapper executable.
 - Updated README, VISION, SECURITY, and CHANGES with the CI baseline.
 
 ## Verification

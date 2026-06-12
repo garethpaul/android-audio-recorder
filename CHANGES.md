@@ -18,6 +18,14 @@
   accidentally enter the legacy Gradle path.
 - Disabled persisted checkout credentials and replaced substring workflow
   checks with one canonical, single-workflow security contract.
+- Made canonical workflow comparison byte-exact, added ownership for CI,
+  Gradle, and the complete app tree, and locked the legacy Gradle/module layout.
+- Rejected alternate manifests, local Android binary dependencies, and direct
+  network clients in the SDK-free privacy baseline.
+- Enforced the exact microphone-only manifest, rejected protected-path
+  symlinks and packaged binaries, and recorded Gradle wrapper hashes.
+- Removed an inaccurate generated device preview that did not represent the
+  recorder's two-button interface.
 
 ## 2026-06-09
 
