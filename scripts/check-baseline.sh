@@ -13,6 +13,7 @@ LAYOUT="$ROOT_DIR/app/src/main/res/layout/activity_main.xml"
 README="$ROOT_DIR/README.md"
 RES_DIR="$ROOT_DIR/app/src/main/res"
 CI_PLAN="$ROOT_DIR/docs/plans/2026-06-10-ci-baseline.md"
+INTERRUPTED_RECORDING_PLAN="$ROOT_DIR/docs/plans/2026-06-12-interrupted-recording-cleanup.md"
 CI_WORKFLOW="$ROOT_DIR/.github/workflows/check.yml"
 CODEOWNERS="$ROOT_DIR/.github/CODEOWNERS"
 EXPECTED_FILE=$(mktemp "${TMPDIR:-/tmp}/android-audio-recorder-expected.XXXXXX")
@@ -437,6 +438,30 @@ for stop_contract in \
   fi
 done
 
+if ! awk '
+  /private void discardInterruptedRecording\(\)/ {
+    in_discard = 1
+  }
+  in_discard && /stopRecording\(\);/ {
+    found_stop = 1
+  }
+  in_discard && found_stop && /recording\.delete\(\)/ {
+    found_delete_after_stop = 1
+  }
+  in_discard && /interrupted recording cleanup failed/ {
+    found_generic_error = 1
+  }
+  in_discard && /^    }$/ {
+    exit found_stop && found_delete_after_stop && found_generic_error ? 0 : 1
+  }
+  END {
+    exit found_stop && found_delete_after_stop && found_generic_error ? 0 : 1
+  }
+' "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Interrupted recordings must stop before deletion and use a generic cleanup error." >&2
+  exit 1
+fi
+
 if ! grep -Fq "if (onPlay(true))" "$MAIN_ACTIVITY"; then
   printf '%s\n' "Play UI must only enter playback state after startup succeeds." >&2
   exit 1
@@ -453,8 +478,8 @@ if ! grep -Fq "private void releasePlayer()" "$MAIN_ACTIVITY"; then
 fi
 
 ON_PAUSE=$(awk '/public void onPause\(\)/,/^    }/' "$MAIN_ACTIVITY")
-if ! printf '%s\n' "$ON_PAUSE" | grep -Fq "stopRecording();"; then
-  printf '%s\n' "Recorder lifecycle cleanup must stop active recording before release." >&2
+if ! printf '%s\n' "$ON_PAUSE" | grep -Fq "discardInterruptedRecording();"; then
+  printf '%s\n' "Recorder lifecycle cleanup must discard interrupted recording after guarded finalization." >&2
   exit 1
 fi
 if ! printf '%s\n' "$ON_PAUSE" | grep -Fq "stopPlaying();"; then
@@ -620,6 +645,11 @@ if ! grep -Fq "recording finalization failures" "$README"; then
   exit 1
 fi
 
+if ! grep -Fq "Pause-interrupted recordings are deleted" "$README"; then
+  printf '%s\n' "README must document pause-interrupted recording deletion." >&2
+  exit 1
+fi
+
 if ! grep -Fq "make check" "$ROOT_DIR/docs/plans/2026-06-09-recorder-startup-ui-state.md"; then
   printf '%s\n' "Recorder startup UI state plan must document make check verification." >&2
   exit 1
@@ -653,6 +683,13 @@ fi
 
 if ! grep -Fq "Status: Completed" "$CI_PLAN" || ! grep -Fq "make check" "$CI_PLAN"; then
   printf '%s\n' "Recorder CI baseline plan must record completed status and make check verification." >&2
+  exit 1
+fi
+
+if [ ! -f "$INTERRUPTED_RECORDING_PLAN" ] || \
+   ! grep -Fq "Status: Completed" "$INTERRUPTED_RECORDING_PLAN" || \
+   ! grep -Fq "make check" "$INTERRUPTED_RECORDING_PLAN"; then
+  printf '%s\n' "Interrupted recording cleanup plan must record completed status and make check verification." >&2
   exit 1
 fi
 

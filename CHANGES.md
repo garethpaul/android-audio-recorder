@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-12
+
+- Deleted pause-interrupted recordings after guarded recorder finalization so
+  backgrounding cannot retain microphone audio hidden by the reset UI.
+
 ## 2026-06-10
 
 - Routed pause-time media cleanup through guarded recorder/player stop methods

@@ -75,6 +75,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   state so released media resources do not leave stale stop controls on screen.
 - Recorder lifecycle cleanup routes active capture and playback through guarded
   stop methods before release, allowing recording containers to finalize.
+- Pause-interrupted recordings are deleted after guarded finalization so
+  backgrounding does not retain microphone audio that the reset UI cannot play.
 - Recorder controls keep playback hidden after recording finalization failures
   instead of presenting an incomplete capture as playable.
 - Playback completion resets the play control to idle and releases the player
@@ -125,6 +127,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   error UI reset contract.
 - See `docs/plans/2026-06-10-ci-baseline.md` for the lightweight GitHub
   Actions baseline.
+- See `docs/plans/2026-06-12-interrupted-recording-cleanup.md` for the
+  pause-interrupted microphone capture deletion contract.
 
 ## Contributing
 

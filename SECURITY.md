@@ -45,6 +45,9 @@ Helpful reports include:
   Repository-wide ownership prevents redirected source from escaping review.
 - Recorder lifecycle cleanup should return released recording/playback controls
   to idle state so users are not left with stale active-media UI.
+- Pause-interrupted microphone captures should be finalized and deleted before
+  the lifecycle reset so backgrounding cannot retain audio that the visible UI
+  no longer exposes.
 
 ## Mobile Privacy Notes
 

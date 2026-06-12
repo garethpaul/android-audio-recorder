@@ -28,6 +28,7 @@ Priority:
 - Reset recorder controls when lifecycle cleanup releases recording resources
 - Expose playback only after recording finalization succeeds
 - Finalize active recording and playback through guarded stop paths on pause
+- Delete pause-interrupted microphone captures after guarded finalization
 - Keep local recorder app state out of Android backups by default
 - Keep recordings in app-specific storage unless a documented user-facing export
   flow is added

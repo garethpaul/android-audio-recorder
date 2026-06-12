@@ -1,6 +1,6 @@
 # Interrupted Recording Cleanup
 
-Status: Planned
+Status: Completed
 
 ## Context
 
@@ -57,15 +57,16 @@ and actual verification only after all gates pass.
 
 ## Verification
 
-- `make check`
-- `make test`
-- `make lint`
-- `make build`
-- `make verify`
+- Focused source inspection confirmed guarded stop precedes deletion and
+  `onPause()` routes active recording through the discard helper.
+- `sh -n scripts/check-baseline.sh` passed.
+- `make test` and `make build` completed with their documented Android SDK
+  skip because no SDK is configured on this host.
+- `make lint`, `make verify`, and `make check` passed through the SDK-free
+  baseline.
 - Focused source mutations removing the discard call, guarded stop, or file
-  deletion
-- `sh -n scripts/check-baseline.sh`
-- `git diff --check`
+  deletion were rejected.
+- `git diff --check` passed.
 
 ## Boundaries
 
