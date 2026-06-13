@@ -11,6 +11,8 @@
 - Guarded completion and error listeners against stale MediaPlayer callbacks
   before they can release or reset a newer playback session.
 - Added mutation-sensitive callback identity and ordering contracts.
+- Added owned runtime handling for active MediaRecorder errors with generic
+  logging, release-before-delete cleanup, and idle control reset.
 
 ## 2026-06-12
 

@@ -18,6 +18,7 @@ INTERRUPTED_RECORDING_PLAN="$ROOT_DIR/docs/plans/2026-06-12-interrupted-recordin
 FAILED_START_PLAN="$ROOT_DIR/docs/plans/2026-06-13-recorder-failed-start-file-cleanup.md"
 STOP_FAILURE_PLAN="$ROOT_DIR/docs/plans/2026-06-13-recorder-stop-failure-file-cleanup.md"
 STALE_PLAYER_PLAN="$ROOT_DIR/docs/plans/2026-06-13-recorder-stale-player-callback.md"
+RECORDER_ERROR_PLAN="$ROOT_DIR/docs/plans/2026-06-13-recorder-runtime-error-callback.md"
 HOSTED_ANDROID_PLAN="$ROOT_DIR/docs/plans/2026-06-12-hosted-android-verification.md"
 WRAPPER_PLAN="$ROOT_DIR/docs/plans/2026-06-12-gradle-wrapper-verification.md"
 CI_WORKFLOW="$ROOT_DIR/.github/workflows/check.yml"
@@ -468,6 +469,46 @@ fi
 
 if ! grep -Fq "public boolean onError(MediaPlayer mp, int what, int extra)" "$MAIN_ACTIVITY"; then
   printf '%s\n' "Playback error listener must handle MediaPlayer errors." >&2
+  exit 1
+fi
+
+for recorder_error_contract in \
+  "mRecorder.setOnErrorListener" \
+  "public void onError(MediaRecorder mr, int what, int extra)" \
+  "if (mRecorder != mr)" \
+  'Log.e(LOG_TAG, "recording error");' \
+  "discardFailedRecording(true);" \
+  "resetRecordingControls();" \
+  "resetPlaybackControls();"; do
+  if ! grep -Fq "$recorder_error_contract" "$MAIN_ACTIVITY"; then
+    printf '%s\n' "Recorder runtime error callback must keep contract: $recorder_error_contract" >&2
+    exit 1
+  fi
+done
+if grep -Eq 'recording error.*(what|extra|mFileName)|Log\.e\([^;]*(what|extra|mFileName)' "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Recorder runtime error logs must not expose platform codes or recording paths." >&2
+  exit 1
+fi
+if ! awk '
+  /mRecorder\.setAudioEncoder/ { encoder = NR }
+  /mRecorder\.setOnErrorListener/ { listener = NR }
+  /mRecorder\.prepare\(\);/ { prepare = NR }
+  /public void onError\(MediaRecorder mr, int what, int extra\)/ { in_error = 1 }
+  in_error && /if \(mRecorder != mr\)/ { guard = NR }
+  in_error && guard && /return;/ && !stale_return { stale_return = NR }
+  in_error && /Log\.e\(LOG_TAG, "recording error"\);/ { error_log = NR }
+  in_error && /discardFailedRecording\(true\);/ { discard = NR }
+  in_error && /resetRecordingControls\(\);/ { recording_reset = NR }
+  in_error && /resetPlaybackControls\(\);/ { playback_reset = NR; in_error = 0 }
+  in_error && /^            \}\);$/ { in_error = 0 }
+  END {
+    exit !(encoder && listener && prepare && encoder < listener && listener < prepare &&
+      guard && stale_return && error_log && discard && recording_reset && playback_reset &&
+      guard < stale_return && stale_return < error_log && error_log < discard &&
+      discard < recording_reset && recording_reset < playback_reset)
+  }
+' "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Recorder error listener must guard ownership, clean up, and reset controls in order." >&2
   exit 1
 fi
 
@@ -971,6 +1012,21 @@ if [ ! -f "$STALE_PLAYER_PLAN" ] || \
   printf '%s\n' "Stale player callback plan must record completed verification." >&2
   exit 1
 fi
+
+if [ ! -f "$RECORDER_ERROR_PLAN" ] || \
+   ! grep -Fq "Status: Completed" "$RECORDER_ERROR_PLAN" || \
+   ! grep -Fq "make check" "$RECORDER_ERROR_PLAN" || \
+   ! grep -Fq "hostile mutations" "$RECORDER_ERROR_PLAN"; then
+  printf '%s\n' "Recorder runtime error plan must record completed verification." >&2
+  exit 1
+fi
+
+for recorder_error_doc in "$ROOT_DIR/AGENTS.md" "$README" "$SECURITY" "$ROOT_DIR/VISION.md" "$ROOT_DIR/CHANGES.md"; do
+  if ! grep -Fq "MediaRecorder errors" "$recorder_error_doc"; then
+    printf '%s\n' "$recorder_error_doc must document active recorder error cleanup." >&2
+    exit 1
+  fi
+done
 
 for stale_player_doc in "$README" "$SECURITY" "$ROOT_DIR/VISION.md" "$ROOT_DIR/CHANGES.md"; do
   if ! grep -Fq "stale MediaPlayer callbacks" "$stale_player_doc"; then

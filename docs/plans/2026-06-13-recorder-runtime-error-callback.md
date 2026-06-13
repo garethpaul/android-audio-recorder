@@ -1,6 +1,6 @@
 # Recorder Runtime Error Callback
 
-Status: Planned
+Status: Completed
 
 ## Context
 
@@ -74,4 +74,17 @@ credential, and exact-head hosted checks.
 
 ## Verification
 
-- Pending implementation.
+- Local and external-working-directory `make check` passed all SDK-free source,
+  callback ownership, cleanup ordering, documentation, and repository
+  contracts.
+- Nine focused hostile mutations were rejected across listener registration
+  and timing, stale ownership, generic logging, discard/reset presence and
+  ordering, guidance, and completed-plan status. A callback-bounded checker fix
+  was added after a precise reset-removal mutation exposed parser state leakage.
+- No Android SDK is configured locally, so Android lint, Gradle tests, Java
+  compilation, and debug assembly were truthfully skipped and remain required
+  in hosted CI.
+- Final diff, artifact, conflict-marker, credential-pattern, and whitespace
+  inspection passed. Emulator, physical-device, microphone, and forced
+  recorder-error behavior were not exercised.
+- Hosted exact-head evidence remains pending push.

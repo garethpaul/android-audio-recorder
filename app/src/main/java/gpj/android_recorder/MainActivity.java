@@ -139,6 +139,17 @@ public class MainActivity extends Activity {
             mRecorder.setOutputFile(mFileName);
             mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
             outputConfigured = true;
+            mRecorder.setOnErrorListener(new MediaRecorder.OnErrorListener() {
+                public void onError(MediaRecorder mr, int what, int extra) {
+                    if (mRecorder != mr) {
+                        return;
+                    }
+                    Log.e(LOG_TAG, "recording error");
+                    discardFailedRecording(true);
+                    resetRecordingControls();
+                    resetPlaybackControls();
+                }
+            });
             mRecorder.prepare();
             mRecorder.start();
             return true;

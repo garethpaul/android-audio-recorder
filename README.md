@@ -80,6 +80,8 @@ an uncached build still needs Gradle's HTTPS distribution service.
   leave controls idle.
 - A failed recorder startup also deletes any partial app-local capture after
   releasing the recorder, so hidden failed output is not retained.
+- Active MediaRecorder errors release the owned recorder, delete incomplete
+  output, and reset controls while stale recorder callbacks are ignored.
 - Recorder lifecycle cleanup resets field-backed recording and playback control
   state so released media resources do not leave stale stop controls on screen.
 - Recorder lifecycle cleanup routes active capture and playback through guarded

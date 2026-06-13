@@ -50,6 +50,8 @@
 - Recordings are stored under app-specific external files with an internal storage fallback; the checked-in manifest keeps only microphone permission.
 - Explicit stop failures delete incomplete audio only when an active recorder
   existed, preserving older valid output when no recorder is active.
+- Active MediaRecorder errors must verify recorder ownership before generic
+  logging, incomplete-output cleanup, or control reset.
 - This looks like a legacy Android project or sample. Expect Android SDK, Gradle, and support-library versions to matter.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `VISION.md` for project direction and contribution guardrails.

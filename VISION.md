@@ -27,6 +27,7 @@ Priority:
 - Reset playback controls automatically when media playback completes
 - Reset playback controls automatically when media playback errors
 - Ignore stale MediaPlayer callbacks before they affect current playback state
+- Ignore stale callbacks and clean up incomplete output on active MediaRecorder errors
 - Reset recorder controls when lifecycle cleanup releases recording resources
 - Expose playback only after recording finalization succeeds
 - Finalize active recording and playback through guarded stop paths on pause

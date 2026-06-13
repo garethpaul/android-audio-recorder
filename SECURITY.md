@@ -59,6 +59,8 @@ Helpful reports include:
   partial capture, and cleanup failures must not expose paths or exception data.
 - Explicit stop failures delete incomplete app-local audio after releasing an
   active recorder; no-recorder calls preserve prior valid output.
+- Active MediaRecorder errors use instance ownership before generic logging,
+  release-before-delete cleanup, and control reset.
 
 ## Mobile Privacy Notes
 
