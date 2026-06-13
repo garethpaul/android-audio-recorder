@@ -94,6 +94,8 @@ an uncached build still needs Gradle's HTTPS distribution service.
   without requiring an extra stop tap.
 - Recorder playback errors release the player and reset controls to idle rather
   than leaving the stop icon visible for a failed playback session.
+- Recorder completion and error listeners ignore stale MediaPlayer callbacks
+  before releasing the retained player or resetting current playback controls.
 - `./gradlew lint --no-daemon`, `./gradlew test --no-daemon`, and `./gradlew assembleDebug --no-daemon` when the Android SDK is configured
 - [`docs/plans/2026-06-12-gradle-wrapper-verification.md`](docs/plans/2026-06-12-gradle-wrapper-verification.md)
   records wrapper provenance and compatibility evidence.
@@ -142,6 +144,8 @@ source review first, then rely on the hosted matching platform toolchain.
   recording-state lifecycle reset contract.
 - See `docs/plans/2026-06-09-recorder-playback-error-ui.md` for the playback
   error UI reset contract.
+- See `docs/plans/2026-06-13-recorder-stale-player-callback.md` for retained
+  player identity guards on asynchronous callbacks.
 - See `docs/plans/2026-06-10-ci-baseline.md` for the lightweight GitHub
   Actions baseline.
 - See `docs/plans/2026-06-12-interrupted-recording-cleanup.md` for the

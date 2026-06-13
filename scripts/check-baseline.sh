@@ -17,6 +17,7 @@ CI_PLAN="$ROOT_DIR/docs/plans/2026-06-10-ci-baseline.md"
 INTERRUPTED_RECORDING_PLAN="$ROOT_DIR/docs/plans/2026-06-12-interrupted-recording-cleanup.md"
 FAILED_START_PLAN="$ROOT_DIR/docs/plans/2026-06-13-recorder-failed-start-file-cleanup.md"
 STOP_FAILURE_PLAN="$ROOT_DIR/docs/plans/2026-06-13-recorder-stop-failure-file-cleanup.md"
+STALE_PLAYER_PLAN="$ROOT_DIR/docs/plans/2026-06-13-recorder-stale-player-callback.md"
 HOSTED_ANDROID_PLAN="$ROOT_DIR/docs/plans/2026-06-12-hosted-android-verification.md"
 WRAPPER_PLAN="$ROOT_DIR/docs/plans/2026-06-12-gradle-wrapper-verification.md"
 CI_WORKFLOW="$ROOT_DIR/.github/workflows/check.yml"
@@ -467,6 +468,39 @@ fi
 
 if ! grep -Fq "public boolean onError(MediaPlayer mp, int what, int extra)" "$MAIN_ACTIVITY"; then
   printf '%s\n' "Playback error listener must handle MediaPlayer errors." >&2
+  exit 1
+fi
+
+player_identity_guard_count=$(grep -Fc "if (mPlayer != mp)" "$MAIN_ACTIVITY" || true)
+if [ "$player_identity_guard_count" -ne 2 ]; then
+  printf '%s\n' "Playback completion and error callbacks must both guard retained player identity." >&2
+  exit 1
+fi
+if ! awk '
+  /public void onCompletion\(MediaPlayer mp\)/ { in_completion = 1 }
+  in_completion && /if \(mPlayer != mp\)/ { completion_guard = NR }
+  in_completion && completion_guard && /return;/ && !completion_return { completion_return = NR }
+  in_completion && /releasePlayer\(\);/ { completion_release = NR }
+  in_completion && /resetPlaybackControls\(\);/ { completion_reset = NR; in_completion = 0 }
+  /public boolean onError\(MediaPlayer mp, int what, int extra\)/ { in_error = 1 }
+  in_error && /if \(mPlayer != mp\)/ { error_guard = NR }
+  in_error && error_guard && /return true;/ && !stale_error_return { stale_error_return = NR }
+  in_error && /Log\.e\(LOG_TAG, "playback error"\);/ { error_log = NR }
+  in_error && /releasePlayer\(\);/ { error_release = NR }
+  in_error && /resetPlaybackControls\(\);/ { error_reset = NR }
+  in_error && error_reset && /return true;/ { active_error_return = NR; in_error = 0 }
+  in_error && /^            \}\);$/ { in_error = 0 }
+  END {
+    exit !(completion_guard && completion_return && completion_release && completion_reset &&
+      completion_guard < completion_return && completion_return < completion_release &&
+      completion_release < completion_reset && error_guard && stale_error_return &&
+      error_log && error_release && error_reset && active_error_return &&
+      error_guard < stale_error_return && stale_error_return < error_log &&
+      error_log < error_release && error_release < error_reset &&
+      error_reset < active_error_return)
+  }
+' "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Playback callbacks must reject stale players before logging, release, or UI reset." >&2
   exit 1
 fi
 
@@ -929,6 +963,21 @@ if [ ! -f "$STOP_FAILURE_PLAN" ] || \
   printf '%s\n' "Stop-failure recording cleanup plan must record completed verification." >&2
   exit 1
 fi
+
+if [ ! -f "$STALE_PLAYER_PLAN" ] || \
+   ! grep -Fq "Status: Completed" "$STALE_PLAYER_PLAN" || \
+   ! grep -Fq "make check" "$STALE_PLAYER_PLAN" || \
+   ! grep -Fq "hostile mutations" "$STALE_PLAYER_PLAN"; then
+  printf '%s\n' "Stale player callback plan must record completed verification." >&2
+  exit 1
+fi
+
+for stale_player_doc in "$README" "$SECURITY" "$ROOT_DIR/VISION.md" "$ROOT_DIR/CHANGES.md"; do
+  if ! grep -Fq "stale MediaPlayer callbacks" "$stale_player_doc"; then
+    printf '%s\n' "$stale_player_doc must document retained-player callback ownership." >&2
+    exit 1
+  fi
+done
 
 for stop_failure_doc in "$ROOT_DIR/AGENTS.md" "$README" "$SECURITY" "$ROOT_DIR/VISION.md" "$ROOT_DIR/CHANGES.md"; do
   if ! grep -Fq "Explicit stop failures delete" "$stop_failure_doc"; then

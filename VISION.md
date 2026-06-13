@@ -26,6 +26,7 @@ Priority:
 - Keep recorder construction and configuration failures inside guarded cleanup
 - Reset playback controls automatically when media playback completes
 - Reset playback controls automatically when media playback errors
+- Ignore stale MediaPlayer callbacks before they affect current playback state
 - Reset recorder controls when lifecycle cleanup releases recording resources
 - Expose playback only after recording finalization succeeds
 - Finalize active recording and playback through guarded stop paths on pause

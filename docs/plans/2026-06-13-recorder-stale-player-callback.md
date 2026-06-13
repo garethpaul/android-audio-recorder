@@ -1,6 +1,6 @@
 # Recorder Stale Player Callback Guard
 
-Status: Planned
+Status: Completed
 
 ## Context
 
@@ -61,3 +61,19 @@ hosted verification.
 - Run `git diff --check`, generated-artifact inspection, and credential-shaped
   added-line scans before committing implementation paths.
 - Record hosted evidence only after querying the exact pushed head.
+
+## Verification
+
+- The focused checker initially reached only the expected incomplete-plan
+  assertion after implementation and documentation were added.
+- Eight focused hostile mutations were rejected: both guard removals, both
+  guard reorderings, stale and active error-consumption changes, security
+  guidance rollback, and completed-plan rollback.
+- Mutation testing also exposed and fixed an unbounded checker state that could
+  mistake a later unrelated `return true` for the error listener result.
+- Local and isolated external-directory `make check` passed the complete
+  SDK-free baseline; both truthfully skipped Gradle lint, tests, and build
+  because no Android SDK is configured.
+- The isolated copy used its own temporary Git index for tracked-file checks.
+- `git diff --check`, generated-artifact inspection, and credential-shaped
+  added-line scans passed. Hosted exact-head evidence remains pending push.

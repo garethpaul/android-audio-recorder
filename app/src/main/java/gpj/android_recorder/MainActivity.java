@@ -56,12 +56,18 @@ public class MainActivity extends Activity {
             mPlayer.prepare();
             mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 public void onCompletion(MediaPlayer mp) {
+                    if (mPlayer != mp) {
+                        return;
+                    }
                     releasePlayer();
                     resetPlaybackControls();
                 }
             });
             mPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
                 public boolean onError(MediaPlayer mp, int what, int extra) {
+                    if (mPlayer != mp) {
+                        return true;
+                    }
                     Log.e(LOG_TAG, "playback error");
                     releasePlayer();
                     resetPlaybackControls();

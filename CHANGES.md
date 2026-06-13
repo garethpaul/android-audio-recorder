@@ -8,6 +8,9 @@
   both checked startup failure paths.
 - Explicit stop failures delete improperly finalized app-local audio after
   recorder release while preserving prior output if no recorder was active.
+- Guarded completion and error listeners against stale MediaPlayer callbacks
+  before they can release or reset a newer playback session.
+- Added mutation-sensitive callback identity and ordering contracts.
 
 ## 2026-06-12
 
