@@ -31,7 +31,12 @@ public class MainActivity extends Activity {
             return startRecording();
         }
 
-        return stopRecording();
+        boolean recorderPresent = mRecorder != null;
+        boolean stopped = stopRecording();
+        if (recorderPresent && !stopped) {
+            discardStopFailedRecording();
+        }
+        return stopped;
     }
 
     private boolean onPlay(boolean start) {
@@ -173,6 +178,15 @@ public class MainActivity extends Activity {
             File recording = new File(mFileName);
             if (recording.exists() && !recording.delete()) {
                 Log.e(LOG_TAG, "failed recording cleanup failed");
+            }
+        }
+    }
+
+    private void discardStopFailedRecording() {
+        if (mFileName != null) {
+            File recording = new File(mFileName);
+            if (recording.exists() && !recording.delete()) {
+                Log.e(LOG_TAG, "failed finalization cleanup failed");
             }
         }
     }

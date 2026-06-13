@@ -88,6 +88,8 @@ an uncached build still needs Gradle's HTTPS distribution service.
   backgrounding does not retain microphone audio that the reset UI cannot play.
 - Recorder controls keep playback hidden after recording finalization failures
   instead of presenting an incomplete capture as playable.
+- Explicit stop failures delete incomplete app-local audio after recorder
+  release, but a stop call without an active recorder preserves prior output.
 - Playback completion resets the play control to idle and releases the player
   without requiring an extra stop tap.
 - Recorder playback errors release the player and reset controls to idle rather

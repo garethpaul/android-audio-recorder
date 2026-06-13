@@ -1,6 +1,6 @@
 # Recorder Stop-Failure File Cleanup
 
-Status: Planned
+Status: Completed
 
 ## Priority
 
@@ -69,7 +69,16 @@ recordings are preserved when no recorder is active. Record actual verification.
 
 ## Verification
 
-Pending implementation and execution.
+- Isolated, canonical, and external-directory SDK-backed `make check` passed
+  the source contracts, debug/release Java compilation, Android lint with the
+  one documented `OldTargetApi` compatibility warning, debug/release Gradle
+  test tasks, and debug APK assembly.
+- Eight hostile mutations were rejected: active-recorder guard removal,
+  failed-stop condition removal, result-propagation removal, release reordering,
+  deletion removal, path logging, security-guidance removal, and plan rollback.
+- Shell syntax and `git diff --check` passed.
+- Emulator, physical-device, microphone, and forced filesystem-deletion failure
+  behavior were not exercised because those runtime facilities are unavailable.
 
 ## Source
 

@@ -55,6 +55,8 @@ Helpful reports include:
   resources without logging recording paths or device-specific details.
 - A failed recorder startup should release the media object before deleting any
   partial capture, and cleanup failures must not expose paths or exception data.
+- Explicit stop failures delete incomplete app-local audio after releasing an
+  active recorder; no-recorder calls preserve prior valid output.
 
 ## Mobile Privacy Notes
 

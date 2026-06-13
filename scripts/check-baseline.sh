@@ -16,6 +16,7 @@ RES_DIR="$ROOT_DIR/app/src/main/res"
 CI_PLAN="$ROOT_DIR/docs/plans/2026-06-10-ci-baseline.md"
 INTERRUPTED_RECORDING_PLAN="$ROOT_DIR/docs/plans/2026-06-12-interrupted-recording-cleanup.md"
 FAILED_START_PLAN="$ROOT_DIR/docs/plans/2026-06-13-recorder-failed-start-file-cleanup.md"
+STOP_FAILURE_PLAN="$ROOT_DIR/docs/plans/2026-06-13-recorder-stop-failure-file-cleanup.md"
 HOSTED_ANDROID_PLAN="$ROOT_DIR/docs/plans/2026-06-12-hosted-android-verification.md"
 WRAPPER_PLAN="$ROOT_DIR/docs/plans/2026-06-12-gradle-wrapper-verification.md"
 CI_WORKFLOW="$ROOT_DIR/.github/workflows/check.yml"
@@ -513,8 +514,33 @@ if ! grep -Fq "if (onRecord(true))" "$MAIN_ACTIVITY"; then
   exit 1
 fi
 
-if ! grep -Fq "return stopRecording();" "$MAIN_ACTIVITY"; then
-  printf '%s\n' "Recorder stop results must propagate through onRecord()." >&2
+if ! awk '
+  /private boolean onRecord\(boolean start\)/ {
+    in_on_record = 1
+  }
+  /private boolean onPlay\(boolean start\)/ {
+    in_on_record = 0
+  }
+  in_on_record && /boolean recorderPresent = mRecorder != null;/ {
+    found_active_guard = 1
+  }
+  in_on_record && found_active_guard && /boolean stopped = stopRecording\(\);/ {
+    found_stop = 1
+  }
+  in_on_record && found_stop && /if \(recorderPresent && !stopped\)/ {
+    found_failure_guard = 1
+  }
+  in_on_record && found_failure_guard && /discardStopFailedRecording\(\);/ {
+    found_discard = 1
+  }
+  in_on_record && found_discard && /return stopped;/ {
+    found_return = 1
+  }
+  END {
+    exit found_active_guard && found_stop && found_failure_guard && found_discard && found_return ? 0 : 1
+  }
+' "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Explicit recorder stop must guard, stop, discard failed output, and propagate the result in order." >&2
   exit 1
 fi
 
@@ -529,6 +555,27 @@ for stop_contract in \
     exit 1
   fi
 done
+
+if ! awk '
+  /private boolean stopRecording\(\)/ {
+    in_stop = 1
+  }
+  /private void releaseRecorder\(\)/ {
+    in_stop = 0
+  }
+  in_stop && /releaseRecorder\(\);/ {
+    found_release = 1
+  }
+  in_stop && found_release && /return stopped;/ {
+    found_return_after_release = 1
+  }
+  END {
+    exit found_release && found_return_after_release ? 0 : 1
+  }
+' "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Recorder finalization must release the recorder before returning its stop result." >&2
+  exit 1
+fi
 
 if ! awk '
   /private void discardInterruptedRecording\(\)/ {
@@ -551,6 +598,38 @@ if ! awk '
   }
 ' "$MAIN_ACTIVITY"; then
   printf '%s\n' "Interrupted recordings must stop before deletion and use a generic cleanup error." >&2
+  exit 1
+fi
+
+if ! awk '
+  /private void discardStopFailedRecording\(\)/ {
+    in_discard = 1
+  }
+  in_discard && /mFileName != null/ {
+    found_path_guard = 1
+  }
+  in_discard && found_path_guard && /new File\(mFileName\)/ {
+    found_file = 1
+  }
+  in_discard && found_file && /recording\.exists\(\) && !recording\.delete\(\)/ {
+    found_delete = 1
+  }
+  in_discard && found_delete && /failed finalization cleanup failed/ {
+    found_generic_error = 1
+  }
+  in_discard && /^    }$/ {
+    exit found_path_guard && found_file && found_delete && found_generic_error ? 0 : 1
+  }
+  END {
+    exit found_path_guard && found_file && found_delete && found_generic_error ? 0 : 1
+  }
+' "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Failed finalization output cleanup must be guarded, delete the file, and log generically." >&2
+  exit 1
+fi
+
+if grep -Eq 'Log\.[a-zA-Z]+\([^;]*(mFileName|recording\.get|\.getMessage\(\))' "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Recorder logs must not expose recording paths or exception details." >&2
   exit 1
 fi
 
@@ -842,6 +921,21 @@ if [ ! -f "$FAILED_START_PLAN" ] || \
   printf '%s\n' "Failed-start recording cleanup plan must record completed verification." >&2
   exit 1
 fi
+
+if [ ! -f "$STOP_FAILURE_PLAN" ] || \
+   ! grep -Fq "Status: Completed" "$STOP_FAILURE_PLAN" || \
+   ! grep -Fq "make check" "$STOP_FAILURE_PLAN" || \
+   ! grep -Fq "hostile mutations" "$STOP_FAILURE_PLAN"; then
+  printf '%s\n' "Stop-failure recording cleanup plan must record completed verification." >&2
+  exit 1
+fi
+
+for stop_failure_doc in "$ROOT_DIR/AGENTS.md" "$README" "$SECURITY" "$ROOT_DIR/VISION.md" "$ROOT_DIR/CHANGES.md"; do
+  if ! grep -Fq "Explicit stop failures delete" "$stop_failure_doc"; then
+    printf '%s\n' "$stop_failure_doc must document explicit stop-failure output deletion." >&2
+    exit 1
+  fi
+done
 
 for failed_start_doc in "$README" "$SECURITY" "$ROOT_DIR/CHANGES.md"; do
   if ! grep -Fq "failed recorder startup" "$failed_start_doc"; then

@@ -6,6 +6,8 @@
   releasing the `MediaRecorder`.
 - Added ordering, generic-log, documentation, and completed-plan contracts for
   both checked startup failure paths.
+- Explicit stop failures delete improperly finalized app-local audio after
+  recorder release while preserving prior output if no recorder was active.
 
 ## 2026-06-12
 

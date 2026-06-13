@@ -48,6 +48,8 @@
 - No required secret or credential file was identified in the repository scan. If you add integrations later, keep secrets out of git.
 - The recorder disables Android backup in the checked-in manifest so local app state associated with recordings is not backed up by default.
 - Recordings are stored under app-specific external files with an internal storage fallback; the checked-in manifest keeps only microphone permission.
+- Explicit stop failures delete incomplete audio only when an active recorder
+  existed, preserving older valid output when no recorder is active.
 - This looks like a legacy Android project or sample. Expect Android SDK, Gradle, and support-library versions to matter.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `VISION.md` for project direction and contribution guardrails.
