@@ -78,6 +78,8 @@ an uncached build still needs Gradle's HTTPS distribution service.
 - Recorder configuration failures during media construction, microphone
   source, format, output path, or encoder setup release partial resources and
   leave controls idle.
+- A failed recorder startup also deletes any partial app-local capture after
+  releasing the recorder, so hidden failed output is not retained.
 - Recorder lifecycle cleanup resets field-backed recording and playback control
   state so released media resources do not leave stale stop controls on screen.
 - Recorder lifecycle cleanup routes active capture and playback through guarded
@@ -144,6 +146,8 @@ source review first, then rely on the hosted matching platform toolchain.
   pause-interrupted microphone capture deletion contract.
 - See `docs/plans/2026-06-12-recorder-configuration-failures.md` for complete
   recorder startup guarding and partial-resource cleanup.
+- See `docs/plans/2026-06-13-recorder-failed-start-file-cleanup.md` for partial
+  file deletion after failed recorder startup.
 
 ## Contributing
 

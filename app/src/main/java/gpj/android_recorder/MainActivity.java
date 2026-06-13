@@ -120,21 +120,23 @@ public class MainActivity extends Activity {
 
     private boolean startRecording() {
         releaseRecorder();
+        boolean outputConfigured = false;
         try {
             mRecorder = new MediaRecorder();
             mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
             mRecorder.setOutputFile(mFileName);
             mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            outputConfigured = true;
             mRecorder.prepare();
             mRecorder.start();
             return true;
         } catch (IOException e) {
             Log.e(LOG_TAG, "prepare() failed");
-            releaseRecorder();
+            discardFailedRecording(outputConfigured);
         } catch (RuntimeException e) {
             Log.e(LOG_TAG, "startRecording() failed");
-            releaseRecorder();
+            discardFailedRecording(outputConfigured);
         }
 
         return false;
@@ -160,6 +162,19 @@ public class MainActivity extends Activity {
             mRecorder.release();
         }
         mRecorder = null;
+    }
+
+    private void discardFailedRecording(boolean outputConfigured) {
+        releaseRecorder();
+        if (!outputConfigured) {
+            return;
+        }
+        if (mFileName != null) {
+            File recording = new File(mFileName);
+            if (recording.exists() && !recording.delete()) {
+                Log.e(LOG_TAG, "failed recording cleanup failed");
+            }
+        }
     }
 
     private void discardInterruptedRecording() {

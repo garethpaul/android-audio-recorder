@@ -1,5 +1,12 @@
 # Changes
 
+## 2026-06-13
+
+- Deleted partial app-local audio left by a failed recorder startup after first
+  releasing the `MediaRecorder`.
+- Added ordering, generic-log, documentation, and completed-plan contracts for
+  both checked startup failure paths.
+
 ## 2026-06-12
 
 - Regenerated the wrapper bootstrap with official Gradle 8.14.5 tooling while

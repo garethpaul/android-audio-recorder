@@ -15,6 +15,7 @@ SECURITY="$ROOT_DIR/SECURITY.md"
 RES_DIR="$ROOT_DIR/app/src/main/res"
 CI_PLAN="$ROOT_DIR/docs/plans/2026-06-10-ci-baseline.md"
 INTERRUPTED_RECORDING_PLAN="$ROOT_DIR/docs/plans/2026-06-12-interrupted-recording-cleanup.md"
+FAILED_START_PLAN="$ROOT_DIR/docs/plans/2026-06-13-recorder-failed-start-file-cleanup.md"
 HOSTED_ANDROID_PLAN="$ROOT_DIR/docs/plans/2026-06-12-hosted-android-verification.md"
 WRAPPER_PLAN="$ROOT_DIR/docs/plans/2026-06-12-gradle-wrapper-verification.md"
 CI_WORKFLOW="$ROOT_DIR/.github/workflows/check.yml"
@@ -335,27 +336,68 @@ if ! awk '
   in_method && /mRecorder\.setAudioSource/ { source = NR }
   in_method && /mRecorder\.setOutputFormat/ { format = NR }
   in_method && /mRecorder\.setOutputFile/ { output = NR }
+  in_method && /outputConfigured = true;/ { output_configured = NR }
   in_method && /mRecorder\.setAudioEncoder/ { encoder = NR }
   in_method && /mRecorder\.prepare\(\);/ { prepare = NR }
   in_method && /mRecorder\.start\(\);/ { start = NR }
   in_method && /return true;/ { success = NR }
   in_method && /catch \(IOException e\)/ { io_catch = NR }
-  in_method && io_catch && !runtime_catch && /releaseRecorder\(\);/ { io_release = NR }
+  in_method && io_catch && !runtime_catch && /discardFailedRecording\(outputConfigured\);/ { io_cleanup = NR }
   in_method && /catch \(RuntimeException e\)/ { runtime_catch = NR }
-  in_method && runtime_catch && /releaseRecorder\(\);/ { runtime_release = NR }
+  in_method && runtime_catch && /discardFailedRecording\(outputConfigured\);/ { runtime_cleanup = NR }
   in_method && /return false;/ {
     failure = NR
     exit !(initial_release < try_line && try_line < construct && construct < source &&
-      source < format && format < output && output < encoder && encoder < prepare &&
+      source < format && format < output && output < encoder &&
+      encoder < output_configured && output_configured < prepare &&
       prepare < start && start < success && success < io_catch &&
-      io_catch < io_release && io_release < runtime_catch &&
-      runtime_catch < runtime_release && runtime_release < failure)
+      io_catch < io_cleanup && io_cleanup < runtime_catch &&
+      runtime_catch < runtime_cleanup && runtime_cleanup < failure)
   }
   END { if (!failure) exit 1 }
 ' "$MAIN_ACTIVITY"; then
   printf '%s\n' "Recorder construction and configuration must stay inside guarded startup cleanup." >&2
   exit 1
 fi
+
+failed_start_call_count=$(grep -Fc "discardFailedRecording(outputConfigured);" "$MAIN_ACTIVITY" || true)
+if [ "$failed_start_call_count" -ne 2 ]; then
+  printf '%s\n' "Both recorder startup catch paths must discard failed-start output." >&2
+  exit 1
+fi
+if ! awk '
+  /private void discardFailedRecording\(boolean outputConfigured\)/ { in_cleanup = 1 }
+  in_cleanup && /releaseRecorder\(\);/ { release = NR }
+  in_cleanup && /if \(!outputConfigured\)/ { output_guard = NR }
+  in_cleanup && /if \(mFileName != null\)/ { file_guard = NR }
+  in_cleanup && /File recording = new File\(mFileName\);/ { file = NR }
+  in_cleanup && /recording\.exists\(\)/ { exists = NR }
+  in_cleanup && /!recording\.delete\(\)/ { delete_file = NR }
+  in_cleanup && /failed recording cleanup failed/ { generic_log = NR }
+  in_cleanup && /^    }$/ {
+    exit !(release && output_guard && file_guard && file && exists && delete_file && generic_log &&
+      release < output_guard && output_guard < file_guard && file_guard < file && file < exists &&
+      exists <= delete_file && delete_file < generic_log)
+  }
+  END {
+    exit !(release && output_guard && file_guard && file && exists && delete_file && generic_log &&
+      release < output_guard && output_guard < file_guard && file_guard < file && file < exists &&
+      exists <= delete_file && delete_file < generic_log)
+  }
+' "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Failed recorder startup must release before deleting partial output and log generically." >&2
+  exit 1
+fi
+for sensitive_cleanup_log in \
+  'failed recording cleanup failed" +' \
+  'Log.e(LOG_TAG, "failed recording cleanup failed",' \
+  'Log.e(LOG_TAG, mFileName' \
+  'Log.e(LOG_TAG, recording'; do
+  if grep -Fq "$sensitive_cleanup_log" "$MAIN_ACTIVITY"; then
+    printf '%s\n' "Failed recording cleanup logs must not expose path or exception details." >&2
+    exit 1
+  fi
+done
 
 if ! grep -Fq "private boolean startPlaying()" "$MAIN_ACTIVITY"; then
   printf '%s\n' "startPlaying must return a success flag." >&2
@@ -792,5 +834,20 @@ if [ ! -f "$INTERRUPTED_RECORDING_PLAN" ] || \
   printf '%s\n' "Interrupted recording cleanup plan must record completed status and make check verification." >&2
   exit 1
 fi
+
+if [ ! -f "$FAILED_START_PLAN" ] || \
+   ! grep -Fq "Status: Completed" "$FAILED_START_PLAN" || \
+   ! grep -Fq "make check" "$FAILED_START_PLAN" || \
+   ! grep -Fq "hostile mutations" "$FAILED_START_PLAN"; then
+  printf '%s\n' "Failed-start recording cleanup plan must record completed verification." >&2
+  exit 1
+fi
+
+for failed_start_doc in "$README" "$SECURITY" "$ROOT_DIR/CHANGES.md"; do
+  if ! grep -Fq "failed recorder startup" "$failed_start_doc"; then
+    printf '%s\n' "$failed_start_doc must document failed recorder startup cleanup." >&2
+    exit 1
+  fi
+done
 
 printf '%s\n' "Audio recorder baseline checks passed."

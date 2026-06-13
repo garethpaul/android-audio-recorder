@@ -53,6 +53,8 @@ Helpful reports include:
   no longer exposes.
 - Recorder construction and configuration failures should release partial media
   resources without logging recording paths or device-specific details.
+- A failed recorder startup should release the media object before deleting any
+  partial capture, and cleanup failures must not expose paths or exception data.
 
 ## Mobile Privacy Notes
 
