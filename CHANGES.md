@@ -2,6 +2,8 @@
 
 ## 2026-06-14
 
+- Reconciled playback startup success only while the exact started player
+  remains active, preventing immediate errors from restoring stale controls.
 - Playback startup failures restore record-ready controls instead of leaving
   the user on a play-only failure state.
 - Output ownership begins immediately after setOutputFile succeeds, closing

@@ -1,6 +1,6 @@
 # Reconcile Playback Start With Active Player Ownership
 
-Status: Planned
+Status: Completed
 
 ## Context
 
@@ -34,3 +34,20 @@ value as success and restores the playing state.
   device, speaker, or corrupt-media callback timing is claimed.
 - PRs in the existing stack remain open and must not be merged or closed without
   explicit owner authorization.
+
+## Verification Results
+
+Completed on 2026-06-14:
+
+- SDK-backed `make check` passed the source gate, debug and release Java
+  compilation, Android lint, Gradle test tasks, and debug APK assembly under
+  Amazon Corretto 8 and Android API 22. Lint retained one existing
+  `OldTargetApi` warning and no errors.
+- External-working-directory `make check` passed the portable source gate with
+  Android SDK variables intentionally unset.
+- Nine hostile mutations were rejected when they detached or inverted player
+  ownership, started through the mutable field, restored unconditional success,
+  removed maintained documentation, or reopened this plan.
+- Exact diff, generated-artifact, changed-line secret-pattern, and whitespace
+  audits passed before commit.
+- No emulator, physical device, speaker, or corrupt-media runtime was used.

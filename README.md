@@ -99,6 +99,8 @@ an uncached build still needs Gradle's HTTPS distribution service.
   without requiring an extra stop tap.
 - Recorder playback errors release the player and reset controls to idle rather
   than leaving the stop icon visible for a failed playback session.
+- Playback startup enters the playing state only while the exact started player
+  remains active, so an immediate error callback cannot restore stale controls.
 - Recorder completion and error listeners ignore stale MediaPlayer callbacks
   before releasing the retained player or resetting current playback controls.
 - `./gradlew lint --no-daemon`, `./gradlew test --no-daemon`, and `./gradlew assembleDebug --no-daemon` when the Android SDK is configured

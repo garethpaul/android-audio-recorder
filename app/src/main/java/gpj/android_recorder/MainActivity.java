@@ -51,6 +51,7 @@ public class MainActivity extends Activity {
     private boolean startPlaying() {
         releasePlayer();
         mPlayer = new MediaPlayer();
+        MediaPlayer player = mPlayer;
         try {
             mPlayer.setDataSource(mFileName);
             mPlayer.prepare();
@@ -74,8 +75,8 @@ public class MainActivity extends Activity {
                     return true;
                 }
             });
-            mPlayer.start();
-            return true;
+            player.start();
+            return mPlayer == player;
         } catch (IOException e) {
             Log.e(LOG_TAG, "prepare() failed");
             releasePlayer();

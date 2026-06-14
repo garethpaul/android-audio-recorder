@@ -50,6 +50,8 @@ Helpful reports include:
   to idle state so users are not left with stale active-media UI.
 - Playback startup failures restore record-ready controls without logging
   app-local recording paths or media exception details.
+- Playback startup reports success only while the exact started player remains
+  active, preventing immediate errors from being overwritten by stale UI state.
 - Playback listeners reject stale MediaPlayer callbacks before logging,
   releasing resources, or resetting controls for the current player.
 - Pause-interrupted microphone captures should be finalized and deleted before

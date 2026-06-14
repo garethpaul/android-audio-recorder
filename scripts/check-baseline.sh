@@ -22,6 +22,7 @@ RECORDER_ERROR_PLAN="$ROOT_DIR/docs/plans/2026-06-13-recorder-runtime-error-call
 OUTPUT_OWNERSHIP_PLAN="$ROOT_DIR/docs/plans/2026-06-14-recorder-output-ownership-boundary.md"
 DEVICE_VERIFICATION_PLAN="$ROOT_DIR/docs/plans/2026-06-14-recorder-device-verification-checklist.md"
 PLAYBACK_START_FAILURE_PLAN="$ROOT_DIR/docs/plans/2026-06-14-playback-start-failure-controls.md"
+PLAYBACK_START_OWNERSHIP_PLAN="$ROOT_DIR/docs/plans/2026-06-14-playback-start-player-ownership.md"
 HOSTED_ANDROID_PLAN="$ROOT_DIR/docs/plans/2026-06-12-hosted-android-verification.md"
 WRAPPER_PLAN="$ROOT_DIR/docs/plans/2026-06-12-gradle-wrapper-verification.md"
 CI_WORKFLOW="$ROOT_DIR/.github/workflows/check.yml"
@@ -113,7 +114,8 @@ fi
 for required_path in \
   "$ROOT_DIR/DEVICE_VERIFICATION.md" \
   "$DEVICE_VERIFICATION_PLAN" \
-  "$PLAYBACK_START_FAILURE_PLAN"; do
+  "$PLAYBACK_START_FAILURE_PLAN" \
+  "$PLAYBACK_START_OWNERSHIP_PLAN"; do
   if [ ! -f "$required_path" ]; then
     printf '%s\n' "Required file is missing: ${required_path#"$ROOT_DIR/"}" >&2
     exit 1
@@ -457,6 +459,42 @@ if ! grep -Fq "private boolean startPlaying()" "$MAIN_ACTIVITY"; then
   printf '%s\n' "startPlaying must return a success flag." >&2
   exit 1
 fi
+
+if ! awk '
+  /private boolean startPlaying\(\)/ { in_method = 1 }
+  in_method && /MediaPlayer player = mPlayer;/ { player = NR }
+  in_method && /player\.start\(\);/ { start = NR }
+  in_method && /return mPlayer == player;/ { success = NR }
+  in_method && /catch \(IOException e\)/ { io_catch = NR }
+  END {
+    exit !(player && start && success && io_catch &&
+      player < start && start < success && success < io_catch)
+  }
+' "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Playback startup must succeed only while the exact started player remains active." >&2
+  exit 1
+fi
+
+for playback_start_ownership_document in \
+  "$README" \
+  "$SECURITY" \
+  "$ROOT_DIR/VISION.md" \
+  "$ROOT_DIR/CHANGES.md"; do
+  if ! grep -Fq "exact started player" "$playback_start_ownership_document"; then
+    printf '%s\n' "$playback_start_ownership_document must document playback start ownership reconciliation." >&2
+    exit 1
+  fi
+done
+
+for playback_start_ownership_plan_contract in \
+  "Status: Completed" \
+  "make check" \
+  "mutations"; do
+  if ! grep -Fqi "$playback_start_ownership_plan_contract" "$PLAYBACK_START_OWNERSHIP_PLAN"; then
+    printf '%s\n' "Playback start ownership plan must preserve completion evidence: $playback_start_ownership_plan_contract" >&2
+    exit 1
+  fi
+done
 
 if grep -Fq "final boolean[] mStartPlaying" "$MAIN_ACTIVITY"; then
   printf '%s\n' "Playback state must not be hidden in an onCreate-local array." >&2
