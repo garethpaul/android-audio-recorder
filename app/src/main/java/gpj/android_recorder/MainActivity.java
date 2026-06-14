@@ -137,8 +137,8 @@ public class MainActivity extends Activity {
             mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
             mRecorder.setOutputFile(mFileName);
-            mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
             outputConfigured = true;
+            mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
             mRecorder.setOnErrorListener(new MediaRecorder.OnErrorListener() {
                 public void onError(MediaRecorder mr, int what, int extra) {
                     if (mRecorder != mr) {

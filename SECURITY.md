@@ -57,6 +57,8 @@ Helpful reports include:
   resources without logging recording paths or device-specific details.
 - A failed recorder startup should release the media object before deleting any
   partial capture, and cleanup failures must not expose paths or exception data.
+- Output ownership begins immediately after setOutputFile succeeds; subsequent
+  configuration failures must retain release-before-delete cleanup.
 - Explicit stop failures delete incomplete app-local audio after releasing an
   active recorder; no-recorder calls preserve prior valid output.
 - Active MediaRecorder errors use instance ownership before generic logging,

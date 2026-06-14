@@ -19,6 +19,7 @@ FAILED_START_PLAN="$ROOT_DIR/docs/plans/2026-06-13-recorder-failed-start-file-cl
 STOP_FAILURE_PLAN="$ROOT_DIR/docs/plans/2026-06-13-recorder-stop-failure-file-cleanup.md"
 STALE_PLAYER_PLAN="$ROOT_DIR/docs/plans/2026-06-13-recorder-stale-player-callback.md"
 RECORDER_ERROR_PLAN="$ROOT_DIR/docs/plans/2026-06-13-recorder-runtime-error-callback.md"
+OUTPUT_OWNERSHIP_PLAN="$ROOT_DIR/docs/plans/2026-06-14-recorder-output-ownership-boundary.md"
 HOSTED_ANDROID_PLAN="$ROOT_DIR/docs/plans/2026-06-12-hosted-android-verification.md"
 WRAPPER_PLAN="$ROOT_DIR/docs/plans/2026-06-12-gradle-wrapper-verification.md"
 CI_WORKFLOW="$ROOT_DIR/.github/workflows/check.yml"
@@ -351,8 +352,9 @@ if ! awk '
   in_method && /return false;/ {
     failure = NR
     exit !(initial_release < try_line && try_line < construct && construct < source &&
-      source < format && format < output && output < encoder &&
-      encoder < output_configured && output_configured < prepare &&
+      source < format && format < output && output < output_configured &&
+      output_configured == output + 1 && output_configured < encoder &&
+      encoder < prepare &&
       prepare < start && start < success && success < io_catch &&
       io_catch < io_cleanup && io_cleanup < runtime_catch &&
       runtime_catch < runtime_cleanup && runtime_cleanup < failure)
@@ -1047,6 +1049,14 @@ if [ ! -f "$RECORDER_ERROR_PLAN" ] || \
   exit 1
 fi
 
+if [ ! -f "$OUTPUT_OWNERSHIP_PLAN" ] || \
+   ! grep -Fq "Status: Completed" "$OUTPUT_OWNERSHIP_PLAN" || \
+   ! grep -Fq "make check" "$OUTPUT_OWNERSHIP_PLAN" || \
+   ! grep -Fq "hostile mutations" "$OUTPUT_OWNERSHIP_PLAN"; then
+  printf '%s\n' "Recorder output ownership plan must record completed verification." >&2
+  exit 1
+fi
+
 for recorder_error_doc in "$ROOT_DIR/AGENTS.md" "$README" "$SECURITY" "$ROOT_DIR/VISION.md" "$ROOT_DIR/CHANGES.md"; do
   if ! grep -Fq "MediaRecorder errors" "$recorder_error_doc"; then
     printf '%s\n' "$recorder_error_doc must document active recorder error cleanup." >&2
@@ -1071,6 +1081,13 @@ done
 for failed_start_doc in "$README" "$SECURITY" "$ROOT_DIR/CHANGES.md"; do
   if ! grep -Fq "failed recorder startup" "$failed_start_doc"; then
     printf '%s\n' "$failed_start_doc must document failed recorder startup cleanup." >&2
+    exit 1
+  fi
+done
+
+for output_ownership_doc in "$README" "$SECURITY" "$ROOT_DIR/VISION.md" "$ROOT_DIR/CHANGES.md"; do
+  if ! grep -Fq "Output ownership begins immediately after setOutputFile succeeds" "$output_ownership_doc"; then
+    printf '%s\n' "$output_ownership_doc must document the recorder output ownership boundary." >&2
     exit 1
   fi
 done

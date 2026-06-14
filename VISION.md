@@ -24,6 +24,8 @@ Priority:
 - Keep recorder startup safe when optional UI chrome or controls are missing
 - Keep recorder controls from entering active states when media startup fails
 - Keep recorder construction and configuration failures inside guarded cleanup
+- Output ownership begins immediately after setOutputFile succeeds so every
+  later configuration failure removes incomplete output
 - Reset playback controls automatically when media playback completes
 - Reset playback controls automatically when media playback errors
 - Ignore stale MediaPlayer callbacks before they affect current playback state

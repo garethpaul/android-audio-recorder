@@ -1,6 +1,6 @@
 # Recorder Output Ownership Boundary
 
-Status: Planned
+Status: Completed
 
 ## Problem
 
@@ -32,12 +32,20 @@ The dependency-free checker currently preserves the same incorrect ordering.
 
 ## Verification
 
-- Run `sh scripts/check-baseline.sh` first.
-- Run bounded SDK-backed `make check` with the configured Java 8 and Android
-  SDK toolchain when available.
-- Reject mutations that place the marker before output configuration, restore
-  the stale post-encoder ordering, remove either catch cleanup, or reopen this
-  plan.
+- `sh scripts/check-baseline.sh` passed the corrected source, ordering,
+  documentation, and completed-plan contracts.
+- Bounded SDK-backed `make check` passed with Amazon Corretto 8 and Android API
+  22. It completed debug/release Java compilation, Android lint with the one
+  documented legacy warning, debug/release unit-test tasks, and debug APK
+  assembly.
+- Six hostile mutations were rejected: moving the marker before output
+  configuration, restoring the stale post-encoder ordering, removing either
+  catch cleanup, removing security guidance, and reopening this plan.
+- Shell syntax and `git diff --check` passed. Generated build output is removed
+  before commit, and changed-line credential scanning is required in the final
+  audit.
+- Emulator, physical-device, microphone, and forced encoder-configuration
+  failure behavior were not exercised.
 
 ## Scope Boundaries
 

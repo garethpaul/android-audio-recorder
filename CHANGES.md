@@ -1,5 +1,12 @@
 # Changes
 
+## 2026-06-14
+
+- Output ownership begins immediately after setOutputFile succeeds, closing
+  the failed-cleanup gap before audio encoder configuration.
+- Added mutation-sensitive ordering and completed-plan contracts for the
+  recorder output ownership boundary.
+
 ## 2026-06-13
 
 - Deleted partial app-local audio left by a failed recorder startup after first
