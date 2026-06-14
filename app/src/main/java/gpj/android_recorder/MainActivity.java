@@ -283,6 +283,8 @@ public class MainActivity extends Activity {
                         mPlayButton.setVisibility(View.VISIBLE);
                         mPlayButton.setImageResource(R.drawable.stop);
                         mStartPlaying = false;
+                    } else {
+                        resetPlaybackControls();
                     }
                 } else {
                     onPlay(false);

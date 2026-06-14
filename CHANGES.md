@@ -2,6 +2,8 @@
 
 ## 2026-06-14
 
+- Playback startup failures restore record-ready controls instead of leaving
+  the user on a play-only failure state.
 - Output ownership begins immediately after setOutputFile succeeds, closing
   the failed-cleanup gap before audio encoder configuration.
 - Added mutation-sensitive ordering and completed-plan contracts for the

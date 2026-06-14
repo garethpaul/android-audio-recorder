@@ -48,6 +48,8 @@ Helpful reports include:
   Repository-wide ownership prevents redirected source from escaping review.
 - Recorder lifecycle cleanup should return released recording/playback controls
   to idle state so users are not left with stale active-media UI.
+- Playback startup failures restore record-ready controls without logging
+  app-local recording paths or media exception details.
 - Playback listeners reject stale MediaPlayer callbacks before logging,
   releasing resources, or resetting controls for the current player.
 - Pause-interrupted microphone captures should be finalized and deleted before

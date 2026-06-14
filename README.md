@@ -73,8 +73,9 @@ an uncached build still needs Gradle's HTTPS distribution service.
   first-render button icon state.
 - Recorder startup guards optional action-bar and record/play control lookups
   before wiring button listeners.
-- Recorder controls remain in their idle state after record/play startup failures
-  instead of switching to active recording or playback controls.
+- Recorder controls remain in their idle state after record/play startup failures;
+  playback startup failures restore record-ready controls instead of trapping
+  the user on an unreadable recording.
 - Recorder configuration failures during media construction, microphone
   source, format, output path, or encoder setup release partial resources and
   leave controls idle.

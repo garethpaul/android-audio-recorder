@@ -1,6 +1,6 @@
 # Restore Controls After Playback Start Failure
 
-Status: Planned
+Status: Completed
 
 ## Context
 
@@ -54,11 +54,19 @@ logging app-local file paths.
 
 ## Verification
 
-To be recorded after implementation:
+Completed on 2026-06-14:
 
-- SDK-free contract checker and Java 8/API 22 Gradle gates.
-- Repository-root and external-directory `make check`.
-- Isolated source, ordering, documentation, and plan mutations.
+- The SDK-free checker passed the explicit playback failure branch, reset, and
+  ordering contracts.
+- Full SDK-backed `make check` passed debug and release Java compilation,
+  Android lint, Gradle test tasks, and debug APK assembly under Amazon Corretto
+  8 and the local Android API 22 SDK. Lint retained one existing `OldTargetApi`
+  warning and no errors.
+- External-working-directory `make check` passed the root-independent portable
+  gate with Android SDK variables intentionally unset.
+- Eight isolated mutations were rejected when they removed the failure branch,
+  changed or moved the reset, weakened successful-start gating, removed the
+  plan requirement or documentation, or reopened this plan.
 
 ## Risks
 

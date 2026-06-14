@@ -21,6 +21,7 @@ STALE_PLAYER_PLAN="$ROOT_DIR/docs/plans/2026-06-13-recorder-stale-player-callbac
 RECORDER_ERROR_PLAN="$ROOT_DIR/docs/plans/2026-06-13-recorder-runtime-error-callback.md"
 OUTPUT_OWNERSHIP_PLAN="$ROOT_DIR/docs/plans/2026-06-14-recorder-output-ownership-boundary.md"
 DEVICE_VERIFICATION_PLAN="$ROOT_DIR/docs/plans/2026-06-14-recorder-device-verification-checklist.md"
+PLAYBACK_START_FAILURE_PLAN="$ROOT_DIR/docs/plans/2026-06-14-playback-start-failure-controls.md"
 HOSTED_ANDROID_PLAN="$ROOT_DIR/docs/plans/2026-06-12-hosted-android-verification.md"
 WRAPPER_PLAN="$ROOT_DIR/docs/plans/2026-06-12-gradle-wrapper-verification.md"
 CI_WORKFLOW="$ROOT_DIR/.github/workflows/check.yml"
@@ -111,7 +112,8 @@ fi
 
 for required_path in \
   "$ROOT_DIR/DEVICE_VERIFICATION.md" \
-  "$DEVICE_VERIFICATION_PLAN"; do
+  "$DEVICE_VERIFICATION_PLAN" \
+  "$PLAYBACK_START_FAILURE_PLAN"; do
   if [ ! -f "$required_path" ]; then
     printf '%s\n' "Required file is missing: ${required_path#"$ROOT_DIR/"}" >&2
     exit 1
@@ -761,6 +763,44 @@ if ! grep -Fq "if (onPlay(true))" "$MAIN_ACTIVITY"; then
   printf '%s\n' "Play UI must only enter playback state after startup succeeds." >&2
   exit 1
 fi
+
+if ! awk '
+  /if \(mStartPlaying\)/ { in_start = 1 }
+  in_start && /if \(onPlay\(true\)\)/ { success = NR }
+  in_start && /^                    } else \{/ { failure = NR }
+  in_start && failure && /resetPlaybackControls\(\);/ { reset = NR }
+  in_start && /^                } else \{/ {
+    exit !(success && failure && reset && success < failure && failure < reset && reset < NR)
+  }
+  END {
+    exit !(success && failure && reset && success < failure && failure < reset)
+  }
+' "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Playback startup failure must restore record-ready controls before the stop branch." >&2
+  exit 1
+fi
+
+for playback_start_failure_document in \
+  "$README" \
+  "$SECURITY" \
+  "$ROOT_DIR/VISION.md" \
+  "$ROOT_DIR/CHANGES.md"; do
+  if ! grep -Fqi "playback startup failures restore record-ready controls" \
+    "$playback_start_failure_document"; then
+    printf '%s\n' "$playback_start_failure_document must document playback startup failure recovery." >&2
+    exit 1
+  fi
+done
+
+for playback_start_failure_plan_contract in \
+  "Status: Completed" \
+  "make check" \
+  "mutations"; do
+  if ! grep -Fqi "$playback_start_failure_plan_contract" "$PLAYBACK_START_FAILURE_PLAN"; then
+    printf '%s\n' "Playback startup failure plan must preserve completion evidence: $playback_start_failure_plan_contract" >&2
+    exit 1
+  fi
+done
 
 if ! grep -Fq "private void releaseRecorder()" "$MAIN_ACTIVITY"; then
   printf '%s\n' "Recorder cleanup must be centralized in releaseRecorder()." >&2
