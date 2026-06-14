@@ -20,6 +20,7 @@ STOP_FAILURE_PLAN="$ROOT_DIR/docs/plans/2026-06-13-recorder-stop-failure-file-cl
 STALE_PLAYER_PLAN="$ROOT_DIR/docs/plans/2026-06-13-recorder-stale-player-callback.md"
 RECORDER_ERROR_PLAN="$ROOT_DIR/docs/plans/2026-06-13-recorder-runtime-error-callback.md"
 OUTPUT_OWNERSHIP_PLAN="$ROOT_DIR/docs/plans/2026-06-14-recorder-output-ownership-boundary.md"
+DEVICE_VERIFICATION_PLAN="$ROOT_DIR/docs/plans/2026-06-14-recorder-device-verification-checklist.md"
 HOSTED_ANDROID_PLAN="$ROOT_DIR/docs/plans/2026-06-12-hosted-android-verification.md"
 WRAPPER_PLAN="$ROOT_DIR/docs/plans/2026-06-12-gradle-wrapper-verification.md"
 CI_WORKFLOW="$ROOT_DIR/.github/workflows/check.yml"
@@ -107,6 +108,52 @@ if find "$ROOT_DIR/.github" "$ROOT_DIR/scripts" "$ROOT_DIR/app" "$ROOT_DIR/gradl
   printf '%s\n' "Protected build, CI, and app paths must not contain symbolic links." >&2
   exit 1
 fi
+
+for required_path in \
+  "$ROOT_DIR/DEVICE_VERIFICATION.md" \
+  "$DEVICE_VERIFICATION_PLAN"; do
+  if [ ! -f "$required_path" ]; then
+    printf '%s\n' "Required file is missing: ${required_path#"$ROOT_DIR/"}" >&2
+    exit 1
+  fi
+done
+
+for device_contract in \
+  'commit SHA and pull request' \
+  'Microphone unavailable' \
+  'Prepare/start failure' \
+  'Pause during recording' \
+  'Stale player callback' \
+  'Recorder runtime error' \
+  'Process recreation' \
+  'Do not convert `not run` into passing evidence.' \
+  'recording paths, audio contents' \
+  'every recorder device and media row as' \
+  'unexecuted'; do
+  if ! grep -Fq "$device_contract" "$ROOT_DIR/DEVICE_VERIFICATION.md"; then
+    printf '%s\n' "Recorder device checklist must keep contract: $device_contract" >&2
+    exit 1
+  fi
+done
+
+if ! grep -Fq 'DEVICE_VERIFICATION.md' "$README" || \
+   ! grep -Fq 'explicit unexecuted rows' "$README" || \
+   ! grep -Fqi 'recorder device verification matrix' "$ROOT_DIR/VISION.md" || \
+   ! grep -Fq 'every runtime row explicitly unexecuted' "$ROOT_DIR/CHANGES.md"; then
+  printf '%s\n' 'Repository guidance must document the unexecuted recorder device matrix.' >&2
+  exit 1
+fi
+
+for plan_contract in \
+  'Status: Completed' \
+  'make check' \
+  'hostile mutations' \
+  'No Android SDK, emulator, physical-device, microphone, or media scenario was executed'; do
+  if ! grep -Fq "$plan_contract" "$DEVICE_VERIFICATION_PLAN"; then
+    printf '%s\n' "Recorder device plan must keep completion evidence: $plan_contract" >&2
+    exit 1
+  fi
+done
 
 if grep -Fq "onPlay(mStartPlaying[0]);" "$MAIN_ACTIVITY"; then
   printf '%s\n' "Play button must not dispatch onPlay before branch-specific UI updates." >&2

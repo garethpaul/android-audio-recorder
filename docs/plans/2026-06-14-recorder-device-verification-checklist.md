@@ -1,6 +1,6 @@
 # Recorder Device Verification Checklist
 
-Status: In Progress
+Status: Completed
 
 ## Problem
 
@@ -25,4 +25,11 @@ required before claiming microphone, storage, recording, or playback behavior.
 
 ## Verification
 
-- Pending implementation and bounded repository validation.
+- `sh -n scripts/check-baseline.sh` and the focused recorder baseline checker
+  passed.
+- Repository-root and external-working-directory `make check` passed all
+  portable contracts and retained the existing bounded SDK behavior.
+- Twelve hostile mutations were rejected for removing checklist, permission,
+  startup, recording, playback, lifecycle, privacy, unexecuted-result,
+  documentation, or completed-plan evidence.
+- No Android SDK, emulator, physical-device, microphone, or media scenario was executed; every runtime matrix row remains `not run`.

@@ -6,6 +6,9 @@
   the failed-cleanup gap before audio encoder configuration.
 - Added mutation-sensitive ordering and completed-plan contracts for the
   recorder output ownership boundary.
+- Added an exact-commit recorder device verification matrix for microphone
+  startup, output cleanup, recording, playback, lifecycle, storage, and
+  privacy-safe evidence, with every runtime row explicitly unexecuted.
 
 ## 2026-06-13
 

@@ -41,6 +41,8 @@ Priority:
   flow is added
 - Keep the SDK-free `make check` baseline running in GitHub Actions
 - Keep the legacy Gradle runtime behind a checksum-verified generated wrapper
+- Keep exact-commit recorder device evidence separate from portable contracts,
+  with unexecuted microphone and media scenarios recorded explicitly
 
 Next priorities:
 
@@ -49,6 +51,8 @@ Next priorities:
 - Add Android tests around recording, playback dispatch, and lifecycle handling
 - Evaluate Gradle runtime, SDK, plugin, and dependency modernization together
   in a dedicated compatibility pass; wrapper bootstrap hardening is separate
+- Execute the recorder device verification matrix across representative Android
+  versions with privacy-safe evidence
 
 Contribution rules:
 

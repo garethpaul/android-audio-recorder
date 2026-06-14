@@ -108,6 +108,11 @@ The legacy target SDK produces one documented `OldTargetApi` compatibility
 warning. When the required SDK is unavailable locally, use static checks and
 source review first, then rely on the hosted matching platform toolchain.
 
+Use [`DEVICE_VERIFICATION.md`](DEVICE_VERIFICATION.md) for the exact-commit
+emulator/device matrix. It covers microphone startup, owned-output cleanup,
+recording, playback, lifecycle, app-specific storage, privacy-safe evidence,
+and explicit unexecuted rows.
+
 ## Configuration and Secrets
 
 - No required secret or credential file was identified in the repository scan. If you add integrations later, keep secrets out of git.
@@ -124,6 +129,9 @@ source review first, then rely on the hosted matching platform toolchain.
 - Review changes touching database, model, or persistence code; examples from the scan include docs/plans/2026-06-08-recorder-build-tools-baseline.md.
 
 ## Maintenance Notes
+
+- See `docs/plans/2026-06-14-recorder-device-verification-checklist.md` for the
+  recorder/device evidence matrix and runtime non-claims.
 
 - This looks like a legacy Android project or sample. Expect Android SDK, Gradle, and support-library versions to matter.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
