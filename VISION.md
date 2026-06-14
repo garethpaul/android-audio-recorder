@@ -45,6 +45,8 @@ Priority:
 - Keep the legacy Gradle runtime behind a checksum-verified generated wrapper
 - Keep exact-commit recorder device evidence separate from portable contracts,
   with unexecuted microphone and media scenarios recorded explicitly
+- Keep the legacy instrumentation bootstrap assertion compiling while treating
+  device media behavior as a separate verification boundary
 
 Next priorities:
 

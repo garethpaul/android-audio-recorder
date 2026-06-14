@@ -10,4 +10,11 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
     public ApplicationTest() {
         super(Application.class);
     }
+
+    public void testApplicationCreatesRecorderPackage() throws Exception {
+        createApplication();
+
+        assertNotNull(getApplication());
+        assertEquals("gpj.android_recorder", getApplication().getPackageName());
+    }
 }

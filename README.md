@@ -135,6 +135,9 @@ and explicit unexecuted rows.
 
 - See `docs/plans/2026-06-14-recorder-device-verification-checklist.md` for the
   recorder/device evidence matrix and runtime non-claims.
+- The legacy instrumentation bootstrap creates the application and verifies its
+  package identity; recording, playback, UI, and device behavior remain outside
+  that assertion.
 
 - This looks like a legacy Android project or sample. Expect Android SDK, Gradle, and support-library versions to matter.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.

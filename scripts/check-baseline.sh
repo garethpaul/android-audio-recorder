@@ -23,6 +23,8 @@ OUTPUT_OWNERSHIP_PLAN="$ROOT_DIR/docs/plans/2026-06-14-recorder-output-ownership
 DEVICE_VERIFICATION_PLAN="$ROOT_DIR/docs/plans/2026-06-14-recorder-device-verification-checklist.md"
 PLAYBACK_START_FAILURE_PLAN="$ROOT_DIR/docs/plans/2026-06-14-playback-start-failure-controls.md"
 PLAYBACK_START_OWNERSHIP_PLAN="$ROOT_DIR/docs/plans/2026-06-14-playback-start-player-ownership.md"
+INSTRUMENTATION_BOOTSTRAP_PLAN="$ROOT_DIR/docs/plans/2026-06-14-instrumentation-application-bootstrap.md"
+APPLICATION_TEST="$ROOT_DIR/app/src/androidTest/java/gpj/android_recorder/ApplicationTest.java"
 HOSTED_ANDROID_PLAN="$ROOT_DIR/docs/plans/2026-06-12-hosted-android-verification.md"
 WRAPPER_PLAN="$ROOT_DIR/docs/plans/2026-06-12-gradle-wrapper-verification.md"
 CI_WORKFLOW="$ROOT_DIR/.github/workflows/check.yml"
@@ -944,6 +946,40 @@ if ! grep -Fxq "Status: Completed" "$ROOT_DIR/docs/plans/2026-06-14-android-audi
   printf '%s\n' "Android audio Make root protection plan must record completed status." >&2
   exit 1
 fi
+
+for instrumentation_contract in \
+  "public void testApplicationCreatesRecorderPackage() throws Exception" \
+  "createApplication();" \
+  "assertNotNull(getApplication());" \
+  'assertEquals("gpj.android_recorder", getApplication().getPackageName());'; do
+  if ! grep -Fq "$instrumentation_contract" "$APPLICATION_TEST"; then
+    printf '%s\n' "ApplicationTest must keep bootstrap assertion: $instrumentation_contract" >&2
+    exit 1
+  fi
+done
+
+for instrumentation_doc_contract in \
+  "$README|instrumentation bootstrap creates the application" \
+  "$ROOT_DIR/VISION.md|instrumentation bootstrap assertion" \
+  "$ROOT_DIR/CHANGES.md|instrumentation bootstrap assertion"; do
+  instrumentation_doc=${instrumentation_doc_contract%%|*}
+  instrumentation_text=${instrumentation_doc_contract#*|}
+  if ! grep -Fq "$instrumentation_text" "$instrumentation_doc"; then
+    printf '%s\n' "$instrumentation_doc must document the instrumentation bootstrap assertion." >&2
+    exit 1
+  fi
+done
+
+for instrumentation_plan_contract in \
+  "status: completed" \
+  "make check" \
+  "hostile mutations" \
+  "No emulator or physical-device instrumentation was executed"; do
+  if ! grep -Fqi "$instrumentation_plan_contract" "$INSTRUMENTATION_BOOTSTRAP_PLAN"; then
+    printf '%s\n' "Instrumentation plan must keep completion evidence: $instrumentation_plan_contract" >&2
+    exit 1
+  fi
+done
 
 if grep -Fq "/home/gjones" "$ROOT_DIR/Makefile"; then
   printf '%s\n' "Makefile must not embed a maintainer-specific Android SDK path." >&2
