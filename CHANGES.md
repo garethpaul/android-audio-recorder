@@ -2,6 +2,8 @@
 
 ## 2026-06-15
 
+- Added an explicit launcher export boundary for the sole `MAIN`/`LAUNCHER`
+  activity and extended the byte-exact audited manifest contract.
 - Reconciled recording startup success only while the exact started recorder
   remains owned, preventing immediate error cleanup from being overwritten by stale controls.
 

@@ -22,6 +22,8 @@ Priority:
 - Maintain the SDK-free baseline check for quick source verification
 - Keep recorder controls visually aligned with the action they trigger
 - Keep recorder startup safe when optional UI chrome or controls are missing
+- Keep the explicit launcher export boundary limited to `.MainActivity` and
+  keep unrelated Android components private
 - Keep recorder controls from entering active states when media startup fails
 - Playback startup failures restore record-ready controls
 - Keep recorder construction and configuration failures inside guarded cleanup

@@ -26,6 +26,7 @@ PLAYBACK_START_OWNERSHIP_PLAN="$ROOT_DIR/docs/plans/2026-06-14-playback-start-pl
 INSTRUMENTATION_BOOTSTRAP_PLAN="$ROOT_DIR/docs/plans/2026-06-14-instrumentation-application-bootstrap.md"
 INSTRUMENTATION_GATE_PLAN="$ROOT_DIR/docs/plans/2026-06-15-instrumentation-compilation-gate.md"
 RECORDER_START_OWNERSHIP_PLAN="$ROOT_DIR/docs/plans/2026-06-15-recorder-start-ownership.md"
+LAUNCHER_EXPORT_PLAN="$ROOT_DIR/docs/plans/2026-06-15-explicit-launcher-export.md"
 APPLICATION_TEST="$ROOT_DIR/app/src/androidTest/java/gpj/android_recorder/ApplicationTest.java"
 HOSTED_ANDROID_PLAN="$ROOT_DIR/docs/plans/2026-06-12-hosted-android-verification.md"
 WRAPPER_PLAN="$ROOT_DIR/docs/plans/2026-06-12-gradle-wrapper-verification.md"
@@ -182,6 +183,7 @@ cat > "$EXPECTED_FILE" <<'EOF'
         android:theme="@style/AppTheme" >
         <activity
             android:name=".MainActivity"
+            android:exported="true"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -537,6 +539,29 @@ for recorder_start_ownership_plan_contract in \
   "No Android SDK, emulator, physical-device, microphone, or media-runtime scenario was executed"; do
   if ! grep -Fqi "$recorder_start_ownership_plan_contract" "$RECORDER_START_OWNERSHIP_PLAN"; then
     printf '%s\n' "Recorder start ownership plan must preserve completion evidence: $recorder_start_ownership_plan_contract" >&2
+    exit 1
+  fi
+done
+
+for launcher_export_document in \
+  "$ROOT_DIR/AGENTS.md" \
+  "$README" \
+  "$SECURITY" \
+  "$ROOT_DIR/VISION.md" \
+  "$ROOT_DIR/CHANGES.md"; do
+  if ! grep -Fq "explicit launcher export boundary" "$launcher_export_document"; then
+    printf '%s\n' "$launcher_export_document must document the explicit launcher export boundary." >&2
+    exit 1
+  fi
+done
+
+for launcher_export_plan_contract in \
+  "status: completed" \
+  'android:exported="true"' \
+  'repository and external-directory `make check` passed' \
+  "hostile mutations were rejected"; do
+  if ! grep -Fq "$launcher_export_plan_contract" "$LAUNCHER_EXPORT_PLAN"; then
+    printf '%s\n' "Launcher export plan must preserve completion evidence: $launcher_export_plan_contract" >&2
     exit 1
   fi
 done

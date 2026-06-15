@@ -63,6 +63,8 @@ Helpful reports include:
   resources without logging recording paths or device-specific details.
 - A failed recorder startup should release the media object before deleting any
   partial capture, and cleanup failures must not expose paths or exception data.
+- The explicit launcher export boundary is limited to `.MainActivity`; the
+  byte-exact manifest contract rejects unrelated exported components.
 - Output ownership begins immediately after setOutputFile succeeds; subsequent
   configuration failures must retain release-before-delete cleanup.
 - Explicit stop failures delete incomplete app-local audio after releasing an

@@ -54,6 +54,8 @@
   logging, incomplete-output cleanup, or control reset.
 - Recording startup succeeds only while the exact started recorder remains
   owned, so immediate error cleanup cannot be overwritten by stale controls.
+- Keep the explicit launcher export boundary on `.MainActivity`, which owns the
+  sole `MAIN`/`LAUNCHER` filter; do not export unrelated components.
 - This looks like a legacy Android project or sample. Expect Android SDK, Gradle, and support-library versions to matter.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `VISION.md` for project direction and contribution guardrails.

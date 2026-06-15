@@ -1,7 +1,7 @@
 ---
 title: Android Audio Explicit Launcher Export Boundary
 type: security
-status: planned
+status: completed
 date: 2026-06-15
 ---
 
@@ -18,8 +18,8 @@ Android 12 target upgrade where filtered components require an explicit value.
 
 1. P0: Preserve app launch behavior while explicitly declaring the activity's
    existing external reachability.
-2. P1: Add a structural, mutation-sensitive portable contract for the named
-   launcher block and exactly one exported attribute occurrence.
+2. P1: Extend the byte-exact, mutation-sensitive portable manifest contract for
+   the named launcher block and its sole exported attribute.
 3. P1: Synchronize contributor, readme, security, vision, changelog, and plan
    evidence without changing recorder behavior or dependencies.
 
@@ -46,8 +46,8 @@ Add the explicit true value to the existing launcher activity only.
 
 **File:** `scripts/check-baseline.sh`
 
-Count exported attribute occurrences and require the sole declaration within
-the `.MainActivity` block that also owns both launcher filter entries.
+Extend the existing byte-exact audited manifest fixture so any missing, false,
+duplicated, unrelated, or filter-detached declaration fails the portable gate.
 
 ### 3. Synchronize durable guidance
 
@@ -82,3 +82,19 @@ Document the intentional boundary and completed verification evidence.
 - Target/compile SDK, Gradle, Android plugin, or dependency upgrades.
 - New activities, services, receivers, providers, deep links, or permissions.
 - Recorder/player lifecycle, file handling, UI controls, or media behavior.
+
+## Completion Evidence
+
+- POSIX syntax and the focused audio baseline checker passed.
+- repository and external-directory `make check` passed under Java 8 with the
+  configured Android SDK; lint, debug/release unit compilation,
+  instrumentation compilation, and debug assembly succeeded. Android lint
+  retained one pre-existing non-fatal issue in each build variant.
+- Seven isolated hostile mutations were rejected for missing, false,
+  application-owned, filter-detached, same-line duplicate, missing-guidance,
+  and incomplete-plan variants.
+- The exact eight-path diff, generated-artifact cleanup, file modes,
+  whitespace, conflict markers, dependency/workflow drift, and
+  credential-shaped additions were audited before commit.
+- No emulator, physical-device, microphone, speaker, or real media scenario
+  was executed.
