@@ -4,6 +4,8 @@
 
 - Added an instrumentation bootstrap assertion that creates the application and
   verifies the recorder package identity.
+- Added instrumentation APK compilation to the canonical test gate so hosted
+  checks reject stale or uncompilable Android-test source.
 - Reconciled playback startup success only while the exact started player
   remains active, preventing immediate errors from restoring stale controls.
 - Playback startup failures restore record-ready controls instead of leaving

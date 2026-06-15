@@ -24,6 +24,7 @@ DEVICE_VERIFICATION_PLAN="$ROOT_DIR/docs/plans/2026-06-14-recorder-device-verifi
 PLAYBACK_START_FAILURE_PLAN="$ROOT_DIR/docs/plans/2026-06-14-playback-start-failure-controls.md"
 PLAYBACK_START_OWNERSHIP_PLAN="$ROOT_DIR/docs/plans/2026-06-14-playback-start-player-ownership.md"
 INSTRUMENTATION_BOOTSTRAP_PLAN="$ROOT_DIR/docs/plans/2026-06-14-instrumentation-application-bootstrap.md"
+INSTRUMENTATION_GATE_PLAN="$ROOT_DIR/docs/plans/2026-06-15-instrumentation-compilation-gate.md"
 APPLICATION_TEST="$ROOT_DIR/app/src/androidTest/java/gpj/android_recorder/ApplicationTest.java"
 HOSTED_ANDROID_PLAN="$ROOT_DIR/docs/plans/2026-06-12-hosted-android-verification.md"
 WRAPPER_PLAN="$ROOT_DIR/docs/plans/2026-06-12-gradle-wrapper-verification.md"
@@ -117,7 +118,8 @@ for required_path in \
   "$ROOT_DIR/DEVICE_VERIFICATION.md" \
   "$DEVICE_VERIFICATION_PLAN" \
   "$PLAYBACK_START_FAILURE_PLAN" \
-  "$PLAYBACK_START_OWNERSHIP_PLAN"; do
+  "$PLAYBACK_START_OWNERSHIP_PLAN" \
+  "$INSTRUMENTATION_GATE_PLAN"; do
   if [ ! -f "$required_path" ]; then
     printf '%s\n' "Required file is missing: ${required_path#"$ROOT_DIR/"}" >&2
     exit 1
@@ -934,13 +936,17 @@ if [ "$(grep -Fc 'cd $(ROOT) && ANDROID_HOME=' "$ROOT_DIR/Makefile")" -ne 3 ]; t
 fi
 for gradle_contract in \
   '$(GRADLE) lint --no-daemon' \
-  '$(GRADLE) test --no-daemon' \
+  '$(GRADLE) test assembleDebugAndroidTest --no-daemon' \
   '$(GRADLE) assembleDebug --no-daemon'; do
   if [ "$(grep -Fc "$gradle_contract" "$ROOT_DIR/Makefile")" -ne 1 ]; then
     printf '%s\n' "Makefile must keep one rooted Gradle contract: $gradle_contract" >&2
     exit 1
   fi
 done
+if grep -Fq '$(GRADLE) test --no-daemon' "$ROOT_DIR/Makefile"; then
+  printf '%s\n' "Makefile tests must not omit instrumentation APK compilation." >&2
+  exit 1
+fi
 
 if ! grep -Fxq "Status: Completed" "$ROOT_DIR/docs/plans/2026-06-14-android-audio-make-root-override-protection.md"; then
   printf '%s\n' "Android audio Make root protection plan must record completed status." >&2
@@ -977,6 +983,29 @@ for instrumentation_plan_contract in \
   "No emulator or physical-device instrumentation was executed"; do
   if ! grep -Fqi "$instrumentation_plan_contract" "$INSTRUMENTATION_BOOTSTRAP_PLAN"; then
     printf '%s\n' "Instrumentation plan must keep completion evidence: $instrumentation_plan_contract" >&2
+    exit 1
+  fi
+done
+
+for instrumentation_gate_doc_contract in \
+  "$README|canonical test gate compiles the debug instrumentation APK" \
+  "$SECURITY|canonical SDK-backed check compiles instrumentation source" \
+  "$ROOT_DIR/CHANGES.md|Added instrumentation APK compilation to the canonical test gate"; do
+  instrumentation_gate_doc=${instrumentation_gate_doc_contract%%|*}
+  instrumentation_gate_text=${instrumentation_gate_doc_contract#*|}
+  if ! grep -Fq "$instrumentation_gate_text" "$instrumentation_gate_doc"; then
+    printf '%s\n' "$instrumentation_gate_doc must document canonical instrumentation compilation." >&2
+    exit 1
+  fi
+done
+
+for instrumentation_gate_plan_contract in \
+  "Status: Completed" \
+  "make check" \
+  "hostile mutations" \
+  "No emulator or physical-device instrumentation was executed"; do
+  if ! grep -Fqi "$instrumentation_gate_plan_contract" "$INSTRUMENTATION_GATE_PLAN"; then
+    printf '%s\n' "Instrumentation compilation plan must keep completion evidence: $instrumentation_gate_plan_contract" >&2
     exit 1
   fi
 done
@@ -1045,7 +1074,7 @@ if ! grep -Fq "./gradlew lint --no-daemon" "$README"; then
   exit 1
 fi
 
-if ! grep -Fq "./gradlew test --no-daemon" "$README"; then
+if ! grep -Fq "./gradlew test assembleDebugAndroidTest --no-daemon" "$README"; then
   printf '%s\n' "README must document Gradle test verification." >&2
   exit 1
 fi

@@ -44,7 +44,7 @@ git clone https://github.com/garethpaul/android-audio-recorder.git
 cd android-audio-recorder
 scripts/check-baseline.sh
 ./gradlew lint --no-daemon
-./gradlew test --no-daemon
+./gradlew test assembleDebugAndroidTest --no-daemon
 ./gradlew assembleDebug --no-daemon
 ```
 
@@ -61,7 +61,8 @@ an uncached build still needs Gradle's HTTPS distribution service.
 
 ## Testing and Verification
 
-- `make check` - runs the source baseline and Android SDK-backed Gradle checks
+- `make check` - runs the source baseline and Android SDK-backed Gradle checks,
+  including instrumentation APK compilation
   when `ANDROID_HOME` or `ANDROID_SDK_ROOT` is configured
 - `scripts/check-baseline.sh` - runs SDK-free recorder baseline checks
 - The canonical GitHub Actions workflow installs Android API 22 and build-tools
@@ -103,7 +104,7 @@ an uncached build still needs Gradle's HTTPS distribution service.
   remains active, so an immediate error callback cannot restore stale controls.
 - Recorder completion and error listeners ignore stale MediaPlayer callbacks
   before releasing the retained player or resetting current playback controls.
-- `./gradlew lint --no-daemon`, `./gradlew test --no-daemon`, and `./gradlew assembleDebug --no-daemon` when the Android SDK is configured
+- `./gradlew lint --no-daemon`, `./gradlew test assembleDebugAndroidTest --no-daemon`, and `./gradlew assembleDebug --no-daemon` when the Android SDK is configured
 - [`docs/plans/2026-06-12-gradle-wrapper-verification.md`](docs/plans/2026-06-12-gradle-wrapper-verification.md)
   records wrapper provenance and compatibility evidence.
 
@@ -136,8 +137,9 @@ and explicit unexecuted rows.
 - See `docs/plans/2026-06-14-recorder-device-verification-checklist.md` for the
   recorder/device evidence matrix and runtime non-claims.
 - The legacy instrumentation bootstrap creates the application and verifies its
-  package identity; recording, playback, UI, and device behavior remain outside
-  that assertion.
+  package identity. The canonical test gate compiles the debug instrumentation APK,
+  but does not execute it; recording, playback, UI, and device behavior remain
+  outside that assertion.
 
 - This looks like a legacy Android project or sample. Expect Android SDK, Gradle, and support-library versions to matter.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.

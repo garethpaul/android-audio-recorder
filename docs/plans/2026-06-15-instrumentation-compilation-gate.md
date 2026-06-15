@@ -1,6 +1,6 @@
 # Instrumentation Compilation Gate
 
-Status: Planned
+Status: Completed
 
 ## Summary
 
@@ -105,3 +105,16 @@ boundary and retain the device-verification non-claims.
   if `ApplicationTest` no longer compiles.
 - **AE2:** A developer without an Android SDK receives the existing clear skip
   and can still run the portable source baseline.
+
+## Verification Results
+
+- SDK-backed repository and external-directory `make check` passed with Java 8,
+  Android API 22, and build-tools 24.0.3.
+- The canonical test target ran local unit-test tasks and
+  `assembleDebugAndroidTest`; the debug instrumentation APK was packaged.
+- Six hostile mutations removing, weakening, splitting, or misdocumenting the
+  canonical instrumentation compile gate were rejected.
+- Exact-diff, whitespace, generated-artifact, unmerged-path, and changed-line
+  secret audits passed for the intended files.
+- No emulator or physical-device instrumentation was executed, so application,
+  microphone, media, storage, UI, and lifecycle runtime rows remain unexecuted.

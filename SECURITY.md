@@ -33,6 +33,8 @@ Helpful reports include:
 - Pinned, read-only GitHub Actions runs the guarded `make check` baseline;
   review workflow, Gradle, and checker changes as part of the supply-chain
   surface.
+- The canonical SDK-backed check compiles instrumentation source and packages
+  the debug Android-test APK without claiming emulator or device execution.
 - Hosted checkout credentials are not persisted, and `check.yml` remains the
   sole approved workflow until another workflow receives an explicit contract.
 - CODEOWNERS covers CI, verification entry points, Gradle configuration, and
