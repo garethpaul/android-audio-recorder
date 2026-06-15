@@ -25,6 +25,7 @@ PLAYBACK_START_FAILURE_PLAN="$ROOT_DIR/docs/plans/2026-06-14-playback-start-fail
 PLAYBACK_START_OWNERSHIP_PLAN="$ROOT_DIR/docs/plans/2026-06-14-playback-start-player-ownership.md"
 INSTRUMENTATION_BOOTSTRAP_PLAN="$ROOT_DIR/docs/plans/2026-06-14-instrumentation-application-bootstrap.md"
 INSTRUMENTATION_GATE_PLAN="$ROOT_DIR/docs/plans/2026-06-15-instrumentation-compilation-gate.md"
+RECORDER_START_OWNERSHIP_PLAN="$ROOT_DIR/docs/plans/2026-06-15-recorder-start-ownership.md"
 APPLICATION_TEST="$ROOT_DIR/app/src/androidTest/java/gpj/android_recorder/ApplicationTest.java"
 HOSTED_ANDROID_PLAN="$ROOT_DIR/docs/plans/2026-06-12-hosted-android-verification.md"
 WRAPPER_PLAN="$ROOT_DIR/docs/plans/2026-06-12-gradle-wrapper-verification.md"
@@ -392,21 +393,23 @@ if ! awk '
   in_method && /releaseRecorder\(\);/ && !initial_release { initial_release = NR }
   in_method && /try \{/ { try_line = NR }
   in_method && /mRecorder = new MediaRecorder\(\);/ { construct = NR }
-  in_method && /mRecorder\.setAudioSource/ { source = NR }
-  in_method && /mRecorder\.setOutputFormat/ { format = NR }
-  in_method && /mRecorder\.setOutputFile/ { output = NR }
+  in_method && /final MediaRecorder recorder = mRecorder;/ { recorder = NR }
+  in_method && /recorder\.setAudioSource/ { source = NR }
+  in_method && /recorder\.setOutputFormat/ { format = NR }
+  in_method && /recorder\.setOutputFile/ { output = NR }
   in_method && /outputConfigured = true;/ { output_configured = NR }
-  in_method && /mRecorder\.setAudioEncoder/ { encoder = NR }
-  in_method && /mRecorder\.prepare\(\);/ { prepare = NR }
-  in_method && /mRecorder\.start\(\);/ { start = NR }
-  in_method && /return true;/ { success = NR }
+  in_method && /recorder\.setAudioEncoder/ { encoder = NR }
+  in_method && /recorder\.prepare\(\);/ { prepare = NR }
+  in_method && /recorder\.start\(\);/ { start = NR }
+  in_method && /return mRecorder == recorder;/ { success = NR }
   in_method && /catch \(IOException e\)/ { io_catch = NR }
   in_method && io_catch && !runtime_catch && /discardFailedRecording\(outputConfigured\);/ { io_cleanup = NR }
   in_method && /catch \(RuntimeException e\)/ { runtime_catch = NR }
   in_method && runtime_catch && /discardFailedRecording\(outputConfigured\);/ { runtime_cleanup = NR }
   in_method && /return false;/ {
     failure = NR
-    exit !(initial_release < try_line && try_line < construct && construct < source &&
+    exit !(initial_release < try_line && try_line < construct && construct < recorder &&
+      recorder < source &&
       source < format && format < output && output < output_configured &&
       output_configured == output + 1 && output_configured < encoder &&
       encoder < prepare &&
@@ -500,6 +503,44 @@ for playback_start_ownership_plan_contract in \
   fi
 done
 
+for recorder_start_ownership_contract in \
+  "final MediaRecorder recorder = mRecorder;" \
+  "recorder.prepare();" \
+  "recorder.start();" \
+  "return mRecorder == recorder;"; do
+  if ! grep -Fq "$recorder_start_ownership_contract" "$MAIN_ACTIVITY"; then
+    printf '%s\n' "Recorder startup must retain exact instance ownership: $recorder_start_ownership_contract" >&2
+    exit 1
+  fi
+done
+if grep -Fq "mRecorder.start();" "$MAIN_ACTIVITY"; then
+  printf '%s\n' "Recorder startup must not bypass the retained recorder instance." >&2
+  exit 1
+fi
+
+for recorder_start_ownership_document in \
+  "$ROOT_DIR/AGENTS.md" \
+  "$README" \
+  "$SECURITY" \
+  "$ROOT_DIR/VISION.md" \
+  "$ROOT_DIR/CHANGES.md"; do
+  if ! grep -Fq "exact started recorder" "$recorder_start_ownership_document"; then
+    printf '%s\n' "$recorder_start_ownership_document must document recorder start ownership reconciliation." >&2
+    exit 1
+  fi
+done
+
+for recorder_start_ownership_plan_contract in \
+  "status: completed" \
+  "make check" \
+  "hostile mutations" \
+  "No Android SDK, emulator, physical-device, microphone, or media-runtime scenario was executed"; do
+  if ! grep -Fqi "$recorder_start_ownership_plan_contract" "$RECORDER_START_OWNERSHIP_PLAN"; then
+    printf '%s\n' "Recorder start ownership plan must preserve completion evidence: $recorder_start_ownership_plan_contract" >&2
+    exit 1
+  fi
+done
+
 if grep -Fq "final boolean[] mStartPlaying" "$MAIN_ACTIVITY"; then
   printf '%s\n' "Playback state must not be hidden in an onCreate-local array." >&2
   exit 1
@@ -566,7 +607,7 @@ if ! grep -Fq "public boolean onError(MediaPlayer mp, int what, int extra)" "$MA
 fi
 
 for recorder_error_contract in \
-  "mRecorder.setOnErrorListener" \
+  "recorder.setOnErrorListener" \
   "public void onError(MediaRecorder mr, int what, int extra)" \
   "if (mRecorder != mr)" \
   'Log.e(LOG_TAG, "recording error");' \
@@ -583,9 +624,9 @@ if grep -Eq 'recording error.*(what|extra|mFileName)|Log\.e\([^;]*(what|extra|mF
   exit 1
 fi
 if ! awk '
-  /mRecorder\.setAudioEncoder/ { encoder = NR }
-  /mRecorder\.setOnErrorListener/ { listener = NR }
-  /mRecorder\.prepare\(\);/ { prepare = NR }
+  /recorder\.setAudioEncoder/ { encoder = NR }
+  /recorder\.setOnErrorListener/ { listener = NR }
+  /recorder\.prepare\(\);/ { prepare = NR }
   /public void onError\(MediaRecorder mr, int what, int extra\)/ { in_error = 1 }
   in_error && /if \(mRecorder != mr\)/ { guard = NR }
   in_error && guard && /return;/ && !stale_return { stale_return = NR }

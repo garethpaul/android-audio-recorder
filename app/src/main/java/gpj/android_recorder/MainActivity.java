@@ -135,12 +135,13 @@ public class MainActivity extends Activity {
         boolean outputConfigured = false;
         try {
             mRecorder = new MediaRecorder();
-            mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-            mRecorder.setOutputFile(mFileName);
+            final MediaRecorder recorder = mRecorder;
+            recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            recorder.setOutputFile(mFileName);
             outputConfigured = true;
-            mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-            mRecorder.setOnErrorListener(new MediaRecorder.OnErrorListener() {
+            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            recorder.setOnErrorListener(new MediaRecorder.OnErrorListener() {
                 public void onError(MediaRecorder mr, int what, int extra) {
                     if (mRecorder != mr) {
                         return;
@@ -151,9 +152,9 @@ public class MainActivity extends Activity {
                     resetPlaybackControls();
                 }
             });
-            mRecorder.prepare();
-            mRecorder.start();
-            return true;
+            recorder.prepare();
+            recorder.start();
+            return mRecorder == recorder;
         } catch (IOException e) {
             Log.e(LOG_TAG, "prepare() failed");
             discardFailedRecording(outputConfigured);

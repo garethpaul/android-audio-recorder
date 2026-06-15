@@ -1,7 +1,7 @@
 ---
 title: Recorder Start Ownership
 type: reliability
-status: planned
+status: completed
 date: 2026-06-15
 ---
 
@@ -65,6 +65,18 @@ cleanup cannot be overwritten by the click-handler transition.
   lines for credential material before committing.
 - Record Android SDK, emulator, microphone, and media-runtime limitations
   without claiming unexecuted behavior.
+
+## Completion Evidence
+
+- `sh -n scripts/check-baseline.sh` and the focused portable checker passed.
+- `make check` passed from the repository root and through the absolute
+  Makefile path from an external directory.
+- Five hostile mutations were rejected for missing local ownership,
+  field-based start, unconditional success, missing documentation, and
+  incomplete plan status.
+- The final exact diff, generated-artifact, whitespace, conflict-marker, and
+  changed-line credential-pattern audits passed.
+- No Android SDK, emulator, physical-device, microphone, or media-runtime scenario was executed.
 
 ## Risks And Mitigations
 

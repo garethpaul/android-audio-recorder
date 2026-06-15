@@ -69,6 +69,8 @@ Helpful reports include:
   active recorder; no-recorder calls preserve prior valid output.
 - Active MediaRecorder errors use instance ownership before generic logging,
   release-before-delete cleanup, and control reset.
+- Recording startup reports success only while the exact started recorder
+  remains owned, preventing immediate errors from being overwritten by stale UI state.
 
 ## Mobile Privacy Notes
 

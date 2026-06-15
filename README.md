@@ -86,6 +86,8 @@ an uncached build still needs Gradle's HTTPS distribution service.
   recorder configuration failures cannot bypass partial-output cleanup.
 - Active MediaRecorder errors release the owned recorder, delete incomplete
   output, and reset controls while stale recorder callbacks are ignored.
+- Recording startup enters the active state only while the exact started recorder
+  remains owned, so immediate error cleanup cannot be overwritten by the click handler.
 - Recorder lifecycle cleanup resets field-backed recording and playback control
   state so released media resources do not leave stale stop controls on screen.
 - Recorder lifecycle cleanup routes active capture and playback through guarded

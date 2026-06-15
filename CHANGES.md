@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-15
+
+- Reconciled recording startup success only while the exact started recorder
+  remains owned, preventing immediate error cleanup from being overwritten by stale controls.
+
 ## 2026-06-14
 
 - Added an instrumentation bootstrap assertion that creates the application and
