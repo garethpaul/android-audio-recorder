@@ -42,8 +42,12 @@ Priority:
 - Explicit stop failures delete incomplete audio only after recorder release
   and only when an active recorder existed
 - Keep local recorder app state out of Android backups by default
-- Keep recordings in app-specific storage unless a documented user-facing export
-  flow is added
+- Keep recordings in owner-private internal storage unless a documented
+  user-facing export flow is added
+- Preserve finalized audio until a replacement recording stops and promotes
+  successfully; reject unsafe pending/backup path collisions
+- Detach media ownership before release and pair playback with transient audio
+  focus ownership
 - Keep the SDK-free `make check` baseline running in GitHub Actions
 - Keep the legacy Gradle runtime behind a checksum-verified generated wrapper
 - Keep exact-commit recorder device evidence separate from portable contracts,
@@ -55,7 +59,8 @@ Next priorities:
 
 - Add runtime permission handling for microphone and storage access
 - Move storage behavior to modern scoped-storage-compatible APIs
-- Add Android tests around recording, playback dispatch, and lifecycle handling
+- Execute Android device tests around recording, playback dispatch, focus, and
+  lifecycle handling
 - Evaluate Gradle runtime, SDK, plugin, and dependency modernization together
   in a dedicated compatibility pass; wrapper bootstrap hardening is separate
 - Execute the recorder device verification matrix across representative Android

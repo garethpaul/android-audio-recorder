@@ -1,5 +1,17 @@
 # Changes
 
+## 2026-06-19
+
+- Prevented failed or interrupted recording attempts from overwriting the last
+  finalized capture by adding owner-private pending, rollback, and recovery files.
+- Moved sensitive microphone output to internal app storage, tightened file
+  permissions, and rejected symlink, directory, and stale-state collisions.
+- Detached recorder and player ownership before release, added release guards,
+  and kept finalized audio replayable after completion or failed replacement.
+- Added transient playback audio-focus ownership and focus-loss cleanup.
+- Added host Java behavior tests, Android instrumentation storage coverage,
+  lifecycle contracts, and nine hostile mutations to the canonical gate.
+
 ## 2026-06-15
 
 - Added an explicit launcher export boundary for the sole `MAIN`/`LAUNCHER`

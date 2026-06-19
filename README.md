@@ -70,22 +70,21 @@ an uncached build still needs Gradle's HTTPS distribution service.
   requests. The workflow uses Ubuntu 24.04 and cancels superseded runs.
 - Local Gradle checks accept an explicit `ANDROID_HOME` or `ANDROID_SDK_ROOT`;
   the repository does not assume a maintainer-specific SDK location.
-- The baseline check protects media cleanup, play/record dispatch, and
-  first-render button icon state.
+- The baseline runs host Java storage behavior, lifecycle source contracts,
+  nine hostile mutations, play/record dispatch, and first-render button state.
 - Recorder startup guards optional action-bar and record/play control lookups
   before wiring button listeners.
 - Recorder controls remain in their idle state after record/play startup failures;
   playback startup failures restore record-ready controls instead of trapping
   the user on an unreadable recording.
-- Recorder configuration failures during media construction, microphone
-  source, format, output path, or encoder setup release partial resources and
-  leave controls idle.
-- A failed recorder startup also deletes any partial app-local capture after
-  releasing the recorder, so hidden failed output is not retained.
+- Recorder configuration failures release partial resources, discard only the
+  private pending capture, and leave the last finalized recording intact.
 - The explicit launcher export boundary is limited to `.MainActivity` and its
   existing `MAIN`/`LAUNCHER` intent filter.
-- Output ownership begins immediately after setOutputFile succeeds, so later
-  recorder configuration failures cannot bypass partial-output cleanup.
+- Recording output is created owner-only under internal app storage, written to
+  a fixed pending path, and promoted through a rollback backup only after a
+  successful recorder stop. Startup recovery restores a prior finalized file
+  and rejects symlink or non-file state collisions.
 - Active MediaRecorder errors release the owned recorder, delete incomplete
   output, and reset controls while stale recorder callbacks are ignored.
 - Recording startup enters the active state only while the exact started recorder
@@ -96,18 +95,22 @@ an uncached build still needs Gradle's HTTPS distribution service.
   stop methods before release, allowing recording containers to finalize.
 - Pause-interrupted recordings are deleted after guarded finalization so
   backgrounding does not retain microphone audio that the reset UI cannot play.
-- Recorder controls keep playback hidden after recording finalization failures
-  instead of presenting an incomplete capture as playable.
-- Explicit stop failures delete incomplete app-local audio after recorder
-  release, but a stop call without an active recorder preserves prior output.
-- Playback completion resets the play control to idle and releases the player
-  without requiring an extra stop tap.
+- Recorder finalization failures delete only the pending capture and preserve
+  replay access to the last finalized recording.
+- Explicit stop failures delete incomplete pending output after recorder
+  release without deleting the prior finalized recording.
+- Recorder and player ownership detaches before stop/release operations so
+  callbacks and release failures cannot retain or release a newer instance.
+- Playback completion resets the play control to replay-ready idle state,
+  releases the exact player once, and abandons transient audio focus.
 - Recorder playback errors release the player and reset controls to idle rather
   than leaving the stop icon visible for a failed playback session.
 - Playback startup enters the playing state only while the exact started player
   remains active, so an immediate error callback cannot restore stale controls.
 - Recorder completion and error listeners ignore stale MediaPlayer callbacks
   before releasing the retained player or resetting current playback controls.
+- Playback requests transient audio focus and stops/releases on focus loss,
+  lifecycle pause, explicit stop, completion, error, or startup failure.
 - `./gradlew lint --no-daemon`, `./gradlew test assembleDebugAndroidTest --no-daemon`, and `./gradlew assembleDebug --no-daemon` when the Android SDK is configured
 - [`docs/plans/2026-06-12-gradle-wrapper-verification.md`](docs/plans/2026-06-12-gradle-wrapper-verification.md)
   records wrapper provenance and compatibility evidence.

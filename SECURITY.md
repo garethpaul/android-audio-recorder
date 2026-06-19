@@ -61,18 +61,21 @@ Helpful reports include:
   no longer exposes.
 - Recorder construction and configuration failures should release partial media
   resources without logging recording paths or device-specific details.
-- A failed recorder startup should release the media object before deleting any
-  partial capture, and cleanup failures must not expose paths or exception data.
+- A failed recorder startup releases the media object and deletes only its
+  owner-private pending capture; it must not delete the last finalized audio.
 - The explicit launcher export boundary is limited to `.MainActivity`; the
   byte-exact manifest contract rejects unrelated exported components.
-- Output ownership begins immediately after setOutputFile succeeds; subsequent
-  configuration failures must retain release-before-delete cleanup.
-- Explicit stop failures delete incomplete app-local audio after releasing an
-  active recorder; no-recorder calls preserve prior valid output.
+- Recorder output uses internal app storage and a pending/backup/final promotion
+  boundary. Symlink or non-file collisions fail closed, and interrupted
+  promotion restores the prior finalized capture before accepting new audio.
+- Explicit stop failures delete incomplete pending audio after releasing the
+  exact active recorder while preserving prior valid output.
 - Active MediaRecorder errors use instance ownership before generic logging,
   release-before-delete cleanup, and control reset.
 - Recording startup reports success only while the exact started recorder
   remains owned, preventing immediate errors from being overwritten by stale UI state.
+- Recorder and player fields detach before release, and playback audio focus is
+  abandoned on every terminal path so stale callbacks cannot affect new media.
 
 ## Mobile Privacy Notes
 
