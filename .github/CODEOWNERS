@@ -1,0 +1,12 @@
+* @garethpaul
+/.github/CODEOWNERS @garethpaul
+/.github/workflows/ @garethpaul
+/Makefile @garethpaul
+/scripts/check-baseline.sh @garethpaul
+/build.gradle @garethpaul
+/settings.gradle @garethpaul
+/gradle.properties @garethpaul
+/gradle/ @garethpaul
+/gradlew @garethpaul
+/gradlew.bat @garethpaul
+/app/ @garethpaul

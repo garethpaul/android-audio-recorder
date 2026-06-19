@@ -22,24 +22,49 @@ Priority:
 - Maintain the SDK-free baseline check for quick source verification
 - Keep recorder controls visually aligned with the action they trigger
 - Keep recorder startup safe when optional UI chrome or controls are missing
+- Keep the explicit launcher export boundary limited to `.MainActivity` and
+  keep unrelated Android components private
 - Keep recorder controls from entering active states when media startup fails
+- Playback startup failures restore record-ready controls
 - Keep recorder construction and configuration failures inside guarded cleanup
+- Output ownership begins immediately after setOutputFile succeeds so every
+  later configuration failure removes incomplete output
 - Reset playback controls automatically when media playback completes
 - Reset playback controls automatically when media playback errors
+- Enter playback UI state only while the exact started player remains active
+- Enter recording UI state only while the exact started recorder remains owned
+- Ignore stale MediaPlayer callbacks before they affect current playback state
+- Ignore stale callbacks and clean up incomplete output on active MediaRecorder errors
 - Reset recorder controls when lifecycle cleanup releases recording resources
 - Expose playback only after recording finalization succeeds
 - Finalize active recording and playback through guarded stop paths on pause
+- Delete pause-interrupted microphone captures after guarded finalization
+- Explicit stop failures delete incomplete audio only after recorder release
+  and only when an active recorder existed
 - Keep local recorder app state out of Android backups by default
-- Keep recordings in app-specific storage unless a documented user-facing export
-  flow is added
+- Keep recordings in owner-private internal storage unless a documented
+  user-facing export flow is added
+- Preserve finalized audio until a replacement recording stops and promotes
+  successfully; reject unsafe pending/backup path collisions
+- Detach media ownership before release and pair playback with transient audio
+  focus ownership
 - Keep the SDK-free `make check` baseline running in GitHub Actions
+- Keep the legacy Gradle runtime behind a checksum-verified generated wrapper
+- Keep exact-commit recorder device evidence separate from portable contracts,
+  with unexecuted microphone and media scenarios recorded explicitly
+- Keep the legacy instrumentation bootstrap assertion compiling while treating
+  device media behavior as a separate verification boundary
 
 Next priorities:
 
 - Add runtime permission handling for microphone and storage access
 - Move storage behavior to modern scoped-storage-compatible APIs
-- Add Android tests around recording, playback dispatch, and lifecycle handling
-- Modernize Gradle, SDK levels, and dependencies in a dedicated pass
+- Execute Android device tests around recording, playback dispatch, focus, and
+  lifecycle handling
+- Evaluate Gradle runtime, SDK, plugin, and dependency modernization together
+  in a dedicated compatibility pass; wrapper bootstrap hardening is separate
+- Execute the recorder device verification matrix across representative Android
+  versions with privacy-safe evidence
 
 Contribution rules:
 

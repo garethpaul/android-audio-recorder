@@ -32,7 +32,7 @@
 
 ## Testing guidance
 
-- Test-related files detected: `docs/plans/2026-06-09-recorder-app-specific-storage.md`
+- A legacy instrumentation smoke test exists, but there is no substantive behavioral test suite; treat `make check` as the minimum baseline.
 - Start with the narrowest relevant test or Make target, then run `make check` before handing off if the change is not documentation-only.
 - Keep README verification notes in sync when commands, fixtures, or supported toolchains change.
 
@@ -48,6 +48,14 @@
 - No required secret or credential file was identified in the repository scan. If you add integrations later, keep secrets out of git.
 - The recorder disables Android backup in the checked-in manifest so local app state associated with recordings is not backed up by default.
 - Recordings are stored under app-specific external files with an internal storage fallback; the checked-in manifest keeps only microphone permission.
+- Explicit stop failures delete incomplete audio only when an active recorder
+  existed, preserving older valid output when no recorder is active.
+- Active MediaRecorder errors must verify recorder ownership before generic
+  logging, incomplete-output cleanup, or control reset.
+- Recording startup succeeds only while the exact started recorder remains
+  owned, so immediate error cleanup cannot be overwritten by stale controls.
+- Keep the explicit launcher export boundary on `.MainActivity`, which owns the
+  sole `MAIN`/`LAUNCHER` filter; do not export unrelated components.
 - This looks like a legacy Android project or sample. Expect Android SDK, Gradle, and support-library versions to matter.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `VISION.md` for project direction and contribution guardrails.

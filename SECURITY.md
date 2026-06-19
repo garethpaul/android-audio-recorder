@@ -33,16 +33,64 @@ Helpful reports include:
 - Pinned, read-only GitHub Actions runs the guarded `make check` baseline;
   review workflow, Gradle, and checker changes as part of the supply-chain
   surface.
+- The canonical SDK-backed check compiles instrumentation source and packages
+  the debug Android-test APK without claiming emulator or device execution.
+- Hosted checkout credentials are not persisted, and `check.yml` remains the
+  sole approved workflow until another workflow receives an explicit contract.
+- CODEOWNERS covers CI, verification entry points, Gradle configuration, and
+  the complete app tree. Repository rules should require owner approval for
+  those paths and the `Check / check` status.
+- The SDK-free baseline locks the fixed Gradle configuration, rejects alternate
+  manifests, symlinks, packaged binary payloads, and direct network clients,
+  compares the workflow contract byte-for-byte, and verifies wrapper hashes.
+- The baseline pins and verifies the wrapper JAR and Gradle distribution checksums.
+  An uncached bootstrap still depends on Gradle's HTTPS service, so these
+  integrity controls do not provide offline reproducibility.
+- The Android manifest is byte-exact and allows only the microphone permission.
+  Repository-wide ownership prevents redirected source from escaping review.
 - Recorder lifecycle cleanup should return released recording/playback controls
   to idle state so users are not left with stale active-media UI.
+- Playback startup failures restore record-ready controls without logging
+  app-local recording paths or media exception details.
+- Playback startup reports success only while the exact started player remains
+  active, preventing immediate errors from being overwritten by stale UI state.
+- Playback listeners reject stale MediaPlayer callbacks before logging,
+  releasing resources, or resetting controls for the current player.
+- Pause-interrupted microphone captures should be finalized and deleted before
+  the lifecycle reset so backgrounding cannot retain audio that the visible UI
+  no longer exposes.
 - Recorder construction and configuration failures should release partial media
   resources without logging recording paths or device-specific details.
+- A failed recorder startup releases the media object and deletes only its
+  owner-private pending capture; it must not delete the last finalized audio.
+- The explicit launcher export boundary is limited to `.MainActivity`; the
+  byte-exact manifest contract rejects unrelated exported components.
+- Recorder output uses internal app storage and a pending/backup/final promotion
+  boundary. Symlink or non-file collisions fail closed, and interrupted
+  promotion restores the prior finalized capture before accepting new audio.
+- Explicit stop failures delete incomplete pending audio after releasing the
+  exact active recorder while preserving prior valid output.
+- Active MediaRecorder errors use instance ownership before generic logging,
+  release-before-delete cleanup, and control reset.
+- Recording startup reports success only while the exact started recorder
+  remains owned, preventing immediate errors from being overwritten by stale UI state.
+- Recorder and player fields detach before release, and playback audio focus is
+  abandoned on every terminal path so stale callbacks cannot affect new media.
 
 ## Mobile Privacy Notes
+
+The SDK-free baseline does not inspect a built merged manifest. Android
+SDK-backed lint, tests, assembly, and merged-manifest review remain required
+before claiming platform-level permission verification.
 
 If this project requests device permissions such as location, camera, microphone, contacts, Bluetooth, health data, or local storage access, reports should describe the permission involved and whether sensitive data can be accessed, persisted, or transmitted unexpectedly. Please avoid testing against real third-party user data or accounts you do not control.
 
 ## Dependency and Supply Chain Security
+
+The generated Gradle 8.14.5 bootstrap retains the legacy Gradle 2.2.1 runtime
+required by this Android build. Review all four wrapper files together; the
+SDK-free baseline rejects drift from Gradle's published wrapper JAR and
+distribution SHA-256 values.
 
 Dependency updates should come from trusted package managers and should keep lockfiles in sync when lockfiles exist. Do not commit credentials, private keys, tokens, generated secrets, or machine-local configuration. If a vulnerability depends on a compromised package, typosquatting risk, insecure transitive dependency, or unsafe build step, include the package name, affected version, and the path through which it is used.
 

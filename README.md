@@ -35,7 +35,7 @@ Additional scan context:
 
 - Git
 - Android Studio or a compatible Android SDK
-- Gradle or the checked-in Gradle wrapper when present
+- Java 8 and the checked-in Gradle wrapper
 
 ### Setup
 
@@ -44,11 +44,16 @@ git clone https://github.com/garethpaul/android-audio-recorder.git
 cd android-audio-recorder
 scripts/check-baseline.sh
 ./gradlew lint --no-daemon
-./gradlew test --no-daemon
+./gradlew test assembleDebugAndroidTest --no-daemon
 ./gradlew assembleDebug --no-daemon
 ```
 
 The setup commands above are derived from repository files. Legacy mobile, Python, or JavaScript samples may require older SDKs or package versions than a modern workstation uses by default.
+
+The generated wrapper still executes Gradle 2.2.1 for compatibility. It uses
+`distributionSha256Sum` to authenticate the downloaded distribution, while the
+SDK-free baseline verifies the wrapper JAR and launchers. This does not make the first build offline-reproducible;
+an uncached build still needs Gradle's HTTPS distribution service.
 
 ## Running or Using the Project
 
@@ -56,37 +61,68 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 
 ## Testing and Verification
 
-- `make check` - runs the source baseline and Android SDK-backed Gradle checks
+- `make check` - runs the source baseline and Android SDK-backed Gradle checks,
+  including instrumentation APK compilation
   when `ANDROID_HOME` or `ANDROID_SDK_ROOT` is configured
 - `scripts/check-baseline.sh` - runs SDK-free recorder baseline checks
-- GitHub Actions runs `make check` on pushes and pull requests. On hosted
-  Linux runners without the legacy Android SDK, the SDK-free baseline still
-  runs and Gradle gates report clear skips. The workflow uses Ubuntu 24.04 and
-  cancels superseded runs.
+- The canonical GitHub Actions workflow installs Android API 22 and build-tools
+  24.0.3, selects Java 8, and runs full `make check` on pushes and pull
+  requests. The workflow uses Ubuntu 24.04 and cancels superseded runs.
 - Local Gradle checks accept an explicit `ANDROID_HOME` or `ANDROID_SDK_ROOT`;
   the repository does not assume a maintainer-specific SDK location.
-- The baseline check protects media cleanup, play/record dispatch, and
-  first-render button icon state.
+- The baseline runs host Java storage behavior, lifecycle source contracts,
+  nine hostile mutations, play/record dispatch, and first-render button state.
 - Recorder startup guards optional action-bar and record/play control lookups
   before wiring button listeners.
-- Recorder controls remain in their idle state after record/play startup failures
-  instead of switching to active recording or playback controls.
-- Recorder configuration failures during media construction, microphone
-  source, format, output path, or encoder setup release partial resources and
-  leave controls idle.
+- Recorder controls remain in their idle state after record/play startup failures;
+  playback startup failures restore record-ready controls instead of trapping
+  the user on an unreadable recording.
+- Recorder configuration failures release partial resources, discard only the
+  private pending capture, and leave the last finalized recording intact.
+- The explicit launcher export boundary is limited to `.MainActivity` and its
+  existing `MAIN`/`LAUNCHER` intent filter.
+- Recording output is created owner-only under internal app storage, written to
+  a fixed pending path, and promoted through a rollback backup only after a
+  successful recorder stop. Startup recovery restores a prior finalized file
+  and rejects symlink or non-file state collisions.
+- Active MediaRecorder errors release the owned recorder, delete incomplete
+  output, and reset controls while stale recorder callbacks are ignored.
+- Recording startup enters the active state only while the exact started recorder
+  remains owned, so immediate error cleanup cannot be overwritten by the click handler.
 - Recorder lifecycle cleanup resets field-backed recording and playback control
   state so released media resources do not leave stale stop controls on screen.
 - Recorder lifecycle cleanup routes active capture and playback through guarded
   stop methods before release, allowing recording containers to finalize.
-- Recorder controls keep playback hidden after recording finalization failures
-  instead of presenting an incomplete capture as playable.
-- Playback completion resets the play control to idle and releases the player
-  without requiring an extra stop tap.
+- Pause-interrupted recordings are deleted after guarded finalization so
+  backgrounding does not retain microphone audio that the reset UI cannot play.
+- Recorder finalization failures delete only the pending capture and preserve
+  replay access to the last finalized recording.
+- Explicit stop failures delete incomplete pending output after recorder
+  release without deleting the prior finalized recording.
+- Recorder and player ownership detaches before stop/release operations so
+  callbacks and release failures cannot retain or release a newer instance.
+- Playback completion resets the play control to replay-ready idle state,
+  releases the exact player once, and abandons transient audio focus.
 - Recorder playback errors release the player and reset controls to idle rather
   than leaving the stop icon visible for a failed playback session.
-- `./gradlew lint --no-daemon`, `./gradlew test --no-daemon`, and `./gradlew assembleDebug --no-daemon` when the Android SDK is configured
+- Playback startup enters the playing state only while the exact started player
+  remains active, so an immediate error callback cannot restore stale controls.
+- Recorder completion and error listeners ignore stale MediaPlayer callbacks
+  before releasing the retained player or resetting current playback controls.
+- Playback requests transient audio focus and stops/releases on focus loss,
+  lifecycle pause, explicit stop, completion, error, or startup failure.
+- `./gradlew lint --no-daemon`, `./gradlew test assembleDebugAndroidTest --no-daemon`, and `./gradlew assembleDebug --no-daemon` when the Android SDK is configured
+- [`docs/plans/2026-06-12-gradle-wrapper-verification.md`](docs/plans/2026-06-12-gradle-wrapper-verification.md)
+  records wrapper provenance and compatibility evidence.
 
-When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
+The legacy target SDK produces one documented `OldTargetApi` compatibility
+warning. When the required SDK is unavailable locally, use static checks and
+source review first, then rely on the hosted matching platform toolchain.
+
+Use [`DEVICE_VERIFICATION.md`](DEVICE_VERIFICATION.md) for the exact-commit
+emulator/device matrix. It covers microphone startup, owned-output cleanup,
+recording, playback, lifecycle, app-specific storage, privacy-safe evidence,
+and explicit unexecuted rows.
 
 ## Configuration and Secrets
 
@@ -105,11 +141,20 @@ When the required SDK or runtime is unavailable, use static checks and source re
 
 ## Maintenance Notes
 
+- See `docs/plans/2026-06-14-recorder-device-verification-checklist.md` for the
+  recorder/device evidence matrix and runtime non-claims.
+- The legacy instrumentation bootstrap creates the application and verifies its
+  package identity. The canonical test gate compiles the debug instrumentation APK,
+  but does not execute it; recording, playback, UI, and device behavior remain
+  outside that assertion.
+
 - This looks like a legacy Android project or sample. Expect Android SDK, Gradle, and support-library versions to matter.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `VISION.md` for project direction and contribution guardrails.
 - See `docs/plans/2026-06-08-recorder-check-wrapper.md` for the root
   verification wrapper baseline.
+- See `docs/plans/2026-06-12-hosted-android-verification.md` for the complete
+  hosted Android lint, test, and build gate.
 - See `docs/plans/2026-06-09-recorder-button-icon-contracts.md` for the
   first-render button icon contract.
 - See `docs/plans/2026-06-09-recorder-startup-control-guards.md` for action-bar
@@ -126,10 +171,16 @@ When the required SDK or runtime is unavailable, use static checks and source re
   recording-state lifecycle reset contract.
 - See `docs/plans/2026-06-09-recorder-playback-error-ui.md` for the playback
   error UI reset contract.
+- See `docs/plans/2026-06-13-recorder-stale-player-callback.md` for retained
+  player identity guards on asynchronous callbacks.
 - See `docs/plans/2026-06-10-ci-baseline.md` for the lightweight GitHub
   Actions baseline.
+- See `docs/plans/2026-06-12-interrupted-recording-cleanup.md` for the
+  pause-interrupted microphone capture deletion contract.
 - See `docs/plans/2026-06-12-recorder-configuration-failures.md` for complete
   recorder startup guarding and partial-resource cleanup.
+- See `docs/plans/2026-06-13-recorder-failed-start-file-cleanup.md` for partial
+  file deletion after failed recorder startup.
 
 ## Contributing
 
