@@ -1,6 +1,6 @@
 # Recording File Ownership Review
 
-Status: Local verification complete; hosted verification pending.
+Status: Completed.
 
 ## Problem
 
@@ -33,6 +33,10 @@ calls.
 - Lifecycle source contracts cover pending output, exact ownership, replay
   controls, internal storage, launcher export, and audio focus.
 - Nine hostile mutations must be rejected by the host gate.
+- Aggregate PR #17 passed the hosted Android `check` and CodeQL Actions and
+  Java/Kotlin jobs at reviewed head
+  `1ba4fb8382abb5e5a31395920b7ab02397356e80`, then merged as
+  `263c3c2232818d65f7094ae766397dabfff4f46d`.
 - The official Gradle 8.14.5 wrapper JAR SHA-256 is
   `7d3a4ac4de1c32b59bc6a4eb8ecb8e612ccd0cf1ae1e99f66902da64df296172`.
 - Gradle publishes the 2.2.1 all-distribution SHA-256 as
