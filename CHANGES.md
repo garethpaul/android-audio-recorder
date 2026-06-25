@@ -1,5 +1,12 @@
 # Changes
 
+## 2026-06-25
+
+- Bound every playback audio-focus callback to its exact focus request and
+  detached that listener before abandonment. Stale audio-focus callbacks cannot stop a newer player.
+- Added mutation-sensitive focus-listener contracts and repaired the
+  group-readable-output mutation so it changes the intended permission bit.
+
 ## 2026-06-19
 
 - Prevented failed or interrupted recording attempts from overwriting the last

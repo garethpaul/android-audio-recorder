@@ -48,6 +48,7 @@ Priority:
   successfully; reject unsafe pending/backup path collisions
 - Detach media ownership before release and pair playback with transient audio
   focus ownership
+- Stale audio-focus callbacks cannot stop a newer player.
 - Keep the SDK-free `make check` baseline running in GitHub Actions
 - Keep the legacy Gradle runtime behind a checksum-verified generated wrapper
 - Keep exact-commit recorder device evidence separate from portable contracts,

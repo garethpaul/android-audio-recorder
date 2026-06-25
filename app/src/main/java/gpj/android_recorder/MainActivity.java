@@ -29,16 +29,7 @@ public class MainActivity extends Activity {
     private boolean mStartPlaying = true;
     private AudioManager mAudioManager = null;
     private boolean mHasAudioFocus = false;
-    private final AudioManager.OnAudioFocusChangeListener mAudioFocusListener =
-            new AudioManager.OnAudioFocusChangeListener() {
-                public void onAudioFocusChange(int focusChange) {
-                    if (focusChange == AudioManager.AUDIOFOCUS_LOSS ||
-                            focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
-                        stopPlaying();
-                        showIdleControls();
-                    }
-                }
-            };
+    private AudioManager.OnAudioFocusChangeListener mAudioFocusListener = null;
 
     private boolean onRecord(boolean start) {
         if (start) {
@@ -152,19 +143,38 @@ public class MainActivity extends Activity {
         if (mAudioManager == null) {
             return false;
         }
+        final AudioManager.OnAudioFocusChangeListener focusListener =
+                new AudioManager.OnAudioFocusChangeListener() {
+                    public void onAudioFocusChange(int focusChange) {
+                        if (mAudioFocusListener != this) {
+                            return;
+                        }
+                        if (focusChange == AudioManager.AUDIOFOCUS_LOSS ||
+                                focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
+                            stopPlaying();
+                            showIdleControls();
+                        }
+                    }
+                };
         int result = mAudioManager.requestAudioFocus(
-                mAudioFocusListener,
+                focusListener,
                 AudioManager.STREAM_MUSIC,
                 AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
         mHasAudioFocus = result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+        if (mHasAudioFocus) {
+            mAudioFocusListener = focusListener;
+        }
         return mHasAudioFocus;
     }
 
     private void abandonPlaybackAudioFocus() {
-        if (mAudioManager != null && mHasAudioFocus) {
-            mAudioManager.abandonAudioFocus(mAudioFocusListener);
-        }
+        AudioManager.OnAudioFocusChangeListener focusListener = mAudioFocusListener;
+        boolean hadAudioFocus = mHasAudioFocus;
+        mAudioFocusListener = null;
         mHasAudioFocus = false;
+        if (mAudioManager != null && hadAudioFocus && focusListener != null) {
+            mAudioManager.abandonAudioFocus(focusListener);
+        }
     }
 
     private void showIdleControls() {

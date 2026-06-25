@@ -76,6 +76,7 @@ Helpful reports include:
   remains owned, preventing immediate errors from being overwritten by stale UI state.
 - Recorder and player fields detach before release, and playback audio focus is
   abandoned on every terminal path so stale callbacks cannot affect new media.
+- Stale audio-focus callbacks cannot stop a newer player.
 
 ## Mobile Privacy Notes
 

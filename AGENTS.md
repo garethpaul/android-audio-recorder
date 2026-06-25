@@ -52,6 +52,7 @@
   existed, preserving older valid output when no recorder is active.
 - Active MediaRecorder errors must verify recorder ownership before generic
   logging, incomplete-output cleanup, or control reset.
+- Stale audio-focus callbacks cannot stop a newer player.
 - Recording startup succeeds only while the exact started recorder remains
   owned, so immediate error cleanup cannot be overwritten by stale controls.
 - Keep the explicit launcher export boundary on `.MainActivity`, which owns the

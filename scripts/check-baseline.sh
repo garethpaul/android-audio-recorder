@@ -27,6 +27,7 @@ INSTRUMENTATION_BOOTSTRAP_PLAN="$ROOT_DIR/docs/plans/2026-06-14-instrumentation-
 INSTRUMENTATION_GATE_PLAN="$ROOT_DIR/docs/plans/2026-06-15-instrumentation-compilation-gate.md"
 RECORDER_START_OWNERSHIP_PLAN="$ROOT_DIR/docs/plans/2026-06-15-recorder-start-ownership.md"
 LAUNCHER_EXPORT_PLAN="$ROOT_DIR/docs/plans/2026-06-15-explicit-launcher-export.md"
+STALE_AUDIO_FOCUS_PLAN="$ROOT_DIR/docs/plans/2026-06-25-stale-audio-focus-callback.md"
 APPLICATION_TEST="$ROOT_DIR/app/src/androidTest/java/gpj/android_recorder/ApplicationTest.java"
 HOSTED_ANDROID_PLAN="$ROOT_DIR/docs/plans/2026-06-12-hosted-android-verification.md"
 WRAPPER_PLAN="$ROOT_DIR/docs/plans/2026-06-12-gradle-wrapper-verification.md"
@@ -121,7 +122,8 @@ for required_path in \
   "$DEVICE_VERIFICATION_PLAN" \
   "$PLAYBACK_START_FAILURE_PLAN" \
   "$PLAYBACK_START_OWNERSHIP_PLAN" \
-  "$INSTRUMENTATION_GATE_PLAN"; do
+  "$INSTRUMENTATION_GATE_PLAN" \
+  "$STALE_AUDIO_FOCUS_PLAN"; do
   if [ ! -f "$required_path" ]; then
     printf '%s\n' "Required file is missing: ${required_path#"$ROOT_DIR/"}" >&2
     exit 1
@@ -739,6 +741,20 @@ if [ ! -f "$OUTPUT_OWNERSHIP_PLAN" ] || \
   exit 1
 fi
 
+if ! grep -Fq "Status: Completed" "$STALE_AUDIO_FOCUS_PLAN" || \
+   ! grep -Fq "make check" "$STALE_AUDIO_FOCUS_PLAN" || \
+   ! grep -Fq "external working directory" "$STALE_AUDIO_FOCUS_PLAN" || \
+   ! grep -Fq "three hostile audio-focus mutations were rejected" "$STALE_AUDIO_FOCUS_PLAN"; then
+  printf '%s\n' "Stale audio-focus callback plan must record completed verification." >&2
+  exit 1
+fi
+
+if ! grep -Fq "Stale audio focus callback" "$ROOT_DIR/DEVICE_VERIFICATION.md" || \
+   ! grep -Fq "abandoned focus request cannot stop a newer player" "$ROOT_DIR/DEVICE_VERIFICATION.md"; then
+  printf '%s\n' "Device verification must retain the stale audio-focus callback row." >&2
+  exit 1
+fi
+
 for recorder_error_doc in "$ROOT_DIR/AGENTS.md" "$README" "$SECURITY" "$ROOT_DIR/VISION.md" "$ROOT_DIR/CHANGES.md"; do
   if ! grep -Fq "MediaRecorder errors" "$recorder_error_doc"; then
     printf '%s\n' "$recorder_error_doc must document active recorder error cleanup." >&2
@@ -749,6 +765,13 @@ done
 for stale_player_doc in "$README" "$SECURITY" "$ROOT_DIR/VISION.md" "$ROOT_DIR/CHANGES.md"; do
   if ! grep -Fq "stale MediaPlayer callbacks" "$stale_player_doc"; then
     printf '%s\n' "$stale_player_doc must document retained-player callback ownership." >&2
+    exit 1
+  fi
+done
+
+for stale_audio_focus_doc in "$ROOT_DIR/AGENTS.md" "$README" "$SECURITY" "$ROOT_DIR/VISION.md" "$ROOT_DIR/CHANGES.md"; do
+  if ! grep -Fq "Stale audio-focus callbacks cannot stop a newer player." "$stale_audio_focus_doc"; then
+    printf '%s\n' "$stale_audio_focus_doc must document exact audio-focus listener ownership." >&2
     exit 1
   fi
 done
