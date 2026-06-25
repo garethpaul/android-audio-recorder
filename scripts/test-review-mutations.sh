@@ -41,6 +41,21 @@ run_mutation removed-audio-focus \
   's/mAudioManager\.requestAudioFocus/mAudioManager.requestRemovedAudioFocus/' \
   './scripts/test-main-activity-contracts.py'
 
+run_mutation stale-audio-focus-callback \
+  app/src/main/java/gpj/android_recorder/MainActivity.java \
+  's/                        if \(mAudioFocusListener != this\) \{\n                            return;\n                        \}\n//' \
+  './scripts/test-main-activity-contracts.py'
+
+run_mutation wrong-audio-focus-abandonment \
+  app/src/main/java/gpj/android_recorder/MainActivity.java \
+  's/mAudioManager\.abandonAudioFocus\(focusListener\)/mAudioManager.abandonAudioFocus(mAudioFocusListener)/' \
+  './scripts/test-main-activity-contracts.py'
+
+run_mutation retained-audio-focus-ownership \
+  app/src/main/java/gpj/android_recorder/MainActivity.java \
+  's/        mAudioFocusListener = null;\n        mHasAudioFocus = false;/        mHasAudioFocus = false;/' \
+  './scripts/test-main-activity-contracts.py'
+
 run_mutation unguarded-player-construction \
   app/src/main/java/gpj/android_recorder/MainActivity.java \
   's/MediaPlayer player = null;\n        try \{\n            player = new MediaPlayer\(\);/MediaPlayer player = new MediaPlayer();\n        try {/' \
@@ -58,7 +73,7 @@ run_mutation delete-finalized-on-failure \
 
 run_mutation group-readable-output \
   app/src/main/java/gpj/android_recorder/RecordingFileStore.java \
-  's/file\.setReadable\(false, false\)/true/' \
+  's/file\.setReadable\(true, true\)/file.setReadable(true, false)/' \
   './scripts/test-recording-file-store.sh'
 
 run_mutation symlinked-recorder-state \

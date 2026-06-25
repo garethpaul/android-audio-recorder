@@ -111,6 +111,7 @@ an uncached build still needs Gradle's HTTPS distribution service.
   before releasing the retained player or resetting current playback controls.
 - Playback requests transient audio focus and stops/releases on focus loss,
   lifecycle pause, explicit stop, completion, error, or startup failure.
+- Stale audio-focus callbacks cannot stop a newer player.
 - `./gradlew lint --no-daemon`, `./gradlew test assembleDebugAndroidTest --no-daemon`, and `./gradlew assembleDebug --no-daemon` when the Android SDK is configured
 - [`docs/plans/2026-06-12-gradle-wrapper-verification.md`](docs/plans/2026-06-12-gradle-wrapper-verification.md)
   records wrapper provenance and compatibility evidence.

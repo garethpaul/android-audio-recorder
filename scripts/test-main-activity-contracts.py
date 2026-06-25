@@ -37,6 +37,21 @@ require("if (mPlayer != player)", "player startup must preserve exact ownership"
 require("requestAudioFocus", "playback must request audio focus")
 require("abandonAudioFocus", "playback cleanup must abandon audio focus")
 require("AudioManager.AUDIOFOCUS_LOSS", "focus loss must stop active playback")
+require("private AudioManager.OnAudioFocusChangeListener mAudioFocusListener = null;",
+        "activity must own the exact listener for the current focus request")
+require("if (mAudioFocusListener != this)",
+        "stale audio-focus callbacks must not alter current playback")
+require("mAudioFocusListener = focusListener;",
+        "granted audio focus must retain its exact listener")
+require("mAudioManager.abandonAudioFocus(focusListener)",
+        "audio-focus cleanup must abandon the exact owned listener")
+
+abandon_focus = source.index("private void abandonPlaybackAudioFocus()")
+abandon_focus_end = source.index("private void showIdleControls()", abandon_focus)
+abandon_focus_source = source[abandon_focus:abandon_focus_end]
+if abandon_focus_source.index("mAudioFocusListener = null;") > abandon_focus_source.index(
+        "mAudioManager.abandonAudioFocus(focusListener)"):
+    raise AssertionError("audio-focus ownership must detach before platform abandonment")
 
 start_playing = source.index("private boolean startPlaying()")
 start_playing_end = source.index("private void stopPlaying()", start_playing)

@@ -54,6 +54,7 @@ permission safety without a dedicated modernization change.
 | Rotate while recording | Hidden interrupted audio is not retained. | not run | |
 | Background during playback | Active playback stops through guarded cleanup. | not run | |
 | Audio focus loss | Exact active player stops, releases, and restores replay-ready controls. | not run | |
+| Stale audio focus callback | Loss from an abandoned focus request cannot stop a newer player. | not run | |
 | Process recreation | Missing in-memory ownership fails closed. | not run | |
 | Internal storage inspection | Pending, backup, and finalized captures remain owner-only and backups stay disabled. | not run | |
 | Interrupted promotion recovery | Prior finalized audio is restored and stale pending output is deleted. | not run | |
