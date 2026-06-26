@@ -43,7 +43,7 @@ final class RecordingFileStore {
     }
 
     boolean commitRecording() {
-        if (!recordingPending || !isOwnedRegularFile(pendingFile)) {
+        if (!recordingPending || !isOwnedNonEmptyRegularFile(pendingFile)) {
             discardRecording();
             return false;
         }
@@ -83,7 +83,7 @@ final class RecordingFileStore {
     }
 
     File getPlayableFile() {
-        return isOwnedRegularFile(recordingFile) ? recordingFile : null;
+        return isOwnedNonEmptyRegularFile(recordingFile) ? recordingFile : null;
     }
 
     boolean hasPlayableRecording() {
@@ -135,6 +135,10 @@ final class RecordingFileStore {
         } catch (IOException e) {
             return false;
         }
+    }
+
+    private boolean isOwnedNonEmptyRegularFile(File file) {
+        return isOwnedRegularFile(file) && file.length() > 0;
     }
 
     private boolean discardOwnedFile(File file) {
