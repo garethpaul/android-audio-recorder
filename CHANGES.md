@@ -1,5 +1,12 @@
 # Changes
 
+## 2026-06-26
+
+- Rejected zero-byte pending recordings before promotion so an empty capture
+  cannot replace the last finalized audio.
+- Excluded zero-byte finalized files from playback controls and added host
+  regressions plus a hostile mutation for the non-empty output boundary.
+
 ## 2026-06-25
 
 - Bound every playback audio-focus callback to its exact focus request and

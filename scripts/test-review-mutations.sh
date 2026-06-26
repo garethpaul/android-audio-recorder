@@ -76,6 +76,11 @@ run_mutation group-readable-output \
   's/file\.setReadable\(true, true\)/file.setReadable(true, false)/' \
   './scripts/test-recording-file-store.sh'
 
+run_mutation empty-recording-output \
+  app/src/main/java/gpj/android_recorder/RecordingFileStore.java \
+  's/file\.length\(\) > 0/file.length() >= 0/' \
+  './scripts/test-recording-file-store.sh'
+
 run_mutation symlinked-recorder-state \
   app/src/main/java/gpj/android_recorder/RecordingFileStore.java \
   's/if \(!file\.equals\(file\.getCanonicalFile\(\)\) \|\| !file\.isFile\(\)\)/if (!file.isFile())/; s/return file\.exists\(\) && file\.isFile\(\) &&\n                    directory\.equals\(file\.getCanonicalFile\(\)\.getParentFile\(\)\) &&\n                    file\.equals\(file\.getCanonicalFile\(\)\);/return file.exists() \&\& file.isFile();/' \

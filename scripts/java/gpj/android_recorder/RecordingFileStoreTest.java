@@ -11,10 +11,29 @@ import java.util.Set;
 public final class RecordingFileStoreTest {
     public static void main(String[] args) throws Exception {
         testFailedAttemptPreservesLastRecording();
+        testEmptyAttemptPreservesLastRecording();
         testSuccessfulAttemptReplacesLastRecording();
         testRecoveryRestoresBackupAndDeletesPendingOutput();
+        testEmptyFinalizedOutputIsNotPlayable();
         testSymlinkCollisionFailsClosed();
         testRecordingFilesAreOwnerOnlyWhenSupported();
+    }
+
+    private static void testEmptyAttemptPreservesLastRecording() throws Exception {
+        File directory = Files.createTempDirectory("recording-store-empty-").toFile();
+        try {
+            RecordingFileStore store = new RecordingFileStore(directory, "recording.3gp");
+            write(store.beginRecording(), "first");
+            assertTrue(store.commitRecording(), "initial recording should commit");
+
+            store.beginRecording();
+
+            assertFalse(store.commitRecording(), "empty recording must not commit");
+            assertEquals("first", read(store.getPlayableFile()),
+                    "empty recording must preserve the last finalized capture");
+        } finally {
+            deleteTree(directory);
+        }
     }
 
     private static void testFailedAttemptPreservesLastRecording() throws Exception {
@@ -69,6 +88,20 @@ public final class RecordingFileStoreTest {
                     "startup recovery must restore the last finalized capture");
             assertFalse(backup.exists(), "recovered backup must be consumed");
             assertFalse(pending.exists(), "interrupted pending output must be removed");
+        } finally {
+            deleteTree(directory);
+        }
+    }
+
+    private static void testEmptyFinalizedOutputIsNotPlayable() throws Exception {
+        File directory = Files.createTempDirectory("recording-store-empty-final-").toFile();
+        try {
+            new File(directory, "recording.3gp").createNewFile();
+
+            RecordingFileStore store = new RecordingFileStore(directory, "recording.3gp");
+
+            assertFalse(store.hasPlayableRecording(),
+                    "empty finalized output must not be advertised as playable");
         } finally {
             deleteTree(directory);
         }
