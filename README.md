@@ -130,8 +130,8 @@ and explicit unexecuted rows.
 - No required secret or credential file was identified in the repository scan. If you add integrations later, keep secrets out of git.
 - The recorder disables Android backup in the checked-in manifest so local app
   state associated with recordings is not backed up by default.
-- Recordings are stored under app-specific external files with an internal
-  storage fallback; the checked-in manifest keeps only microphone permission.
+- Recordings are stored only in owner-private internal storage; the checked-in
+  manifest keeps only microphone permission.
 
 ## Security and Privacy Notes
 
@@ -164,6 +164,8 @@ and explicit unexecuted rows.
   backup policy contract.
 - See `docs/plans/2026-06-09-recorder-app-specific-storage.md` for the
   recording storage contract.
+- See `docs/plans/2026-06-27-internal-storage-guidance.md` for the maintained
+  privacy-guidance contract that matches the internal-storage implementation.
 - See `docs/plans/2026-06-09-recorder-startup-ui-state.md` for the media
   startup-failure UI state contract.
 - See `docs/plans/2026-06-09-recorder-playback-completion-ui.md` for the

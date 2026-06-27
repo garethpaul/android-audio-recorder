@@ -4,7 +4,7 @@ This document explains the current state and direction of the project.
 Project overview and developer docs: [`README.md`](README.md)
 
 Android Audio Recorder is a legacy Android sample that records audio to
-external storage and plays it back.
+owner-private internal storage and plays it back.
 
 The repository is useful as a compact example of pre-runtime-permission Android
 media capture and playback. Project setup and verification notes live in

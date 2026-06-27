@@ -12,6 +12,8 @@ MANIFEST="$ROOT_DIR/app/src/main/AndroidManifest.xml"
 LAYOUT="$ROOT_DIR/app/src/main/res/layout/activity_main.xml"
 README="$ROOT_DIR/README.md"
 SECURITY="$ROOT_DIR/SECURITY.md"
+AGENT_GUIDANCE="$ROOT_DIR/AGENTS.md"
+VISION="$ROOT_DIR/VISION.md"
 RES_DIR="$ROOT_DIR/app/src/main/res"
 CI_PLAN="$ROOT_DIR/docs/plans/2026-06-10-ci-baseline.md"
 INTERRUPTED_RECORDING_PLAN="$ROOT_DIR/docs/plans/2026-06-12-interrupted-recording-cleanup.md"
@@ -28,6 +30,7 @@ INSTRUMENTATION_GATE_PLAN="$ROOT_DIR/docs/plans/2026-06-15-instrumentation-compi
 RECORDER_START_OWNERSHIP_PLAN="$ROOT_DIR/docs/plans/2026-06-15-recorder-start-ownership.md"
 LAUNCHER_EXPORT_PLAN="$ROOT_DIR/docs/plans/2026-06-15-explicit-launcher-export.md"
 STALE_AUDIO_FOCUS_PLAN="$ROOT_DIR/docs/plans/2026-06-25-stale-audio-focus-callback.md"
+INTERNAL_STORAGE_GUIDANCE_PLAN="$ROOT_DIR/docs/plans/2026-06-27-internal-storage-guidance.md"
 APPLICATION_TEST="$ROOT_DIR/app/src/androidTest/java/gpj/android_recorder/ApplicationTest.java"
 HOSTED_ANDROID_PLAN="$ROOT_DIR/docs/plans/2026-06-12-hosted-android-verification.md"
 WRAPPER_PLAN="$ROOT_DIR/docs/plans/2026-06-12-gradle-wrapper-verification.md"
@@ -123,12 +126,32 @@ for required_path in \
   "$PLAYBACK_START_FAILURE_PLAN" \
   "$PLAYBACK_START_OWNERSHIP_PLAN" \
   "$INSTRUMENTATION_GATE_PLAN" \
-  "$STALE_AUDIO_FOCUS_PLAN"; do
+  "$STALE_AUDIO_FOCUS_PLAN" \
+  "$INTERNAL_STORAGE_GUIDANCE_PLAN"; do
   if [ ! -f "$required_path" ]; then
     printf '%s\n' "Required file is missing: ${required_path#"$ROOT_DIR/"}" >&2
     exit 1
   fi
 done
+
+for storage_guidance in "$README" "$AGENT_GUIDANCE" "$VISION"; do
+  if ! grep -Fq 'owner-private internal storage' "$storage_guidance"; then
+    printf '%s\n' "Maintained guidance must describe owner-private internal recording storage: ${storage_guidance#"$ROOT_DIR/"}" >&2
+    exit 1
+  fi
+done
+
+if grep -Fq 'app-specific external files' "$README" "$AGENT_GUIDANCE" || \
+   grep -Fq 'external storage and plays it back' "$VISION"; then
+  printf '%s\n' "Maintained guidance must not claim recordings use external storage." >&2
+  exit 1
+fi
+
+if ! grep -Fq 'Status: Completed' "$INTERNAL_STORAGE_GUIDANCE_PLAN" || \
+   ! grep -Fq './scripts/check-baseline.sh' "$INTERNAL_STORAGE_GUIDANCE_PLAN"; then
+  printf '%s\n' "Internal-storage guidance plan must record completed baseline verification." >&2
+  exit 1
+fi
 
 for device_contract in \
   'commit SHA and pull request' \

@@ -1,5 +1,45 @@
 # Changes
 
+## 2026-06-27 - P2 - Align recording-storage privacy guidance
+
+### Summary
+
+Corrected maintained documentation that still claimed recordings used external
+storage after the recorder had moved to owner-private internal app storage.
+
+### Work completed
+
+- Updated `README.md`, `AGENTS.md`, and `VISION.md` to match `getFilesDir()`.
+- Added a baseline contract requiring the internal-storage privacy statement.
+- Rejected the obsolete external-storage phrases in maintained guidance.
+- Preserved historical plans that describe earlier repository states.
+
+### Validation
+
+- Focused red baseline failed on the stale `README.md` before correction.
+- `./scripts/check-baseline.sh` passed the maintained guidance contract.
+- A copied-checkout stale external-storage wording mutation was rejected.
+- `make check` passed host storage tests, lifecycle contracts, and all hostile
+  review mutations.
+- Android lint, unit tests, and assembly were skipped locally because no Android
+  SDK is configured.
+- Shell syntax and `git diff --check` passed.
+- Hosted Android run `28272351729` and CodeQL run `28272351073` passed on the
+  implementation head before this evidence-only documentation amendment.
+- `codex review --base master` was attempted and stopped before analysis by the
+  environment's HTTP 401 authentication failure; an immutable manual diff
+  review found no actionable issue.
+
+### Bugs / findings
+
+- P2: privacy-sensitive maintained guidance contradicted both current source and
+  the repository's completed recording ownership review.
+
+### Next action
+
+- Require the evidence-only amendment to pass the same hosted gates, then merge
+  the bounded documentation-contract fix from that unchanged head.
+
 ## 2026-06-26
 
 - Rejected zero-byte pending recordings before promotion so an empty capture
