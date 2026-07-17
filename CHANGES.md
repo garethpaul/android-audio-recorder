@@ -1,5 +1,43 @@
 # Changes
 
+## 2026-07-17 - P2 - Observe host test-runner execution in `make check`
+
+### Summary
+
+`make check` pinned its host verification runners only as Makefile text. Every
+existing pin (`grep -Fc`, `grep -Fxq`) stays satisfied when a runner is
+`@echo`-prefixed or moved verbatim to a target `check` never builds, so the
+runner silently stops executing. `scripts/test-review-mutations.sh` was the sole
+oracle proving the contract runners reject hostile source edits, and its own
+execution and mutation table were unverified: commenting out all thirteen
+mutation entries left `make check` output byte-identical, and deleting the
+`exit 1` from `run_mutation` made the gate print its own success line while every
+mutation survived.
+
+### Work completed
+
+- Added `scripts/test-makefile-test-gates.sh`, which runs `make check` under a
+  fake `SHELL` and requires each host runner's dispatched command line verbatim
+  (whole-line, so an `@echo` prefix cannot forge it), and which plants a contract
+  runner that accepts every mutation and requires the hostile-mutation gate to
+  report a surviving mutation.
+- Invoked the harness from both the `test` target and `scripts/check-baseline.sh`
+  so the two paths cross-guard: removing either invocation is reported by the
+  other.
+- The dispatch assertion also covers `scripts/check-baseline.sh` itself, which
+  the pre-existing `grep -Fc` pin could not, since relocating its recipe line to
+  an unbuilt target left that pin satisfied.
+
+### Verification
+
+- `make check` passed.
+- Each mutation was regressed live and reported by a named assertion: invocation
+  deleted, `@echo`-prefixed, relocated to an unbuilt target, runner stubbed to
+  `exit 0`, mutation table emptied, and `run_mutation`'s `exit 1` deleted. Each
+  assertion block was removed in turn to confirm it is load-bearing.
+- No Android SDK, emulator, physical-device, microphone, or media scenario was
+  executed.
+
 ## 2026-06-27 - P2 - Align recording-storage privacy guidance
 
 ### Summary

@@ -377,6 +377,7 @@ fi
 
 "$ROOT_DIR/scripts/test-recording-file-store.sh"
 "$ROOT_DIR/scripts/test-main-activity-contracts.py"
+"$ROOT_DIR/scripts/test-makefile-test-gates.sh"
 
 if grep -Fq "getExternalFilesDir" "$MAIN_ACTIVITY" || \
    grep -Fq "Environment.getExternalStorageDirectory" "$MAIN_ACTIVITY"; then

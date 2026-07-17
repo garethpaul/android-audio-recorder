@@ -65,6 +65,13 @@ an uncached build still needs Gradle's HTTPS distribution service.
   including instrumentation APK compilation
   when `ANDROID_HOME` or `ANDROID_SDK_ROOT` is configured
 - `scripts/check-baseline.sh` - runs SDK-free recorder baseline checks
+- `scripts/test-makefile-test-gates.sh` - runs `make check` under a fake `SHELL`
+  and requires each host runner's dispatched command line verbatim, then plants a
+  contract runner that accepts every mutation and requires the hostile-mutation
+  gate to report it. Text pins on the Makefile cannot show that a recipe line
+  ran: `@echo`-prefixing a runner, or moving it verbatim to a target `check`
+  never builds, leaves every `grep -Fc` and `grep -Fxq` Makefile pin satisfied
+  while the runner never executes.
 - The canonical GitHub Actions workflow installs Android API 22 and build-tools
   24.0.3, selects Java 8, and runs full `make check` on pushes and pull
   requests. The workflow uses Ubuntu 24.04 and cancels superseded runs.

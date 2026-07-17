@@ -18,6 +18,7 @@ test:
 	$(ROOT)scripts/test-recording-file-store.sh
 	$(ROOT)scripts/test-main-activity-contracts.py
 	$(ROOT)scripts/test-review-mutations.sh
+	$(ROOT)scripts/test-makefile-test-gates.sh
 	@if [ -n "$(ANDROID_SDK)" ] && [ -d "$(ANDROID_SDK)" ]; then \
 		cd $(ROOT) && ANDROID_HOME="$(ANDROID_SDK)" ANDROID_SDK_ROOT="$(ANDROID_SDK)" $(GRADLE) test assembleDebugAndroidTest --no-daemon; \
 	else \
